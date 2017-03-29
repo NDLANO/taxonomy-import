@@ -1,5 +1,6 @@
 package no.ndla.taxonomy;
 
+import no.ndla.taxonomy.client.SubjectIndexDocument;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -22,7 +23,7 @@ public class TSVInterpreterTest {
         String inputLine = "Subject\tMatematikk\t\turn:subject:3\t\turn:article:1\t";
         interpreter.parse(inputLine);
 
-        Import.SubjectIndexDocument subject = restTemplate.getForObject("http://localhost:5000/subjects/" + "urn:subject:3", Import.SubjectIndexDocument.class);
+        SubjectIndexDocument subject = restTemplate.getForObject("http://localhost:5000/subjects/urn:subject:3", SubjectIndexDocument.class);
         assertEquals("Matematikk", subject.name);
         assertEquals("urn:article:1", subject.contentUri.toString());
     }
@@ -32,7 +33,7 @@ public class TSVInterpreterTest {
         String inputLine = "Subject\tDesign og håndverk\t\turn:subject:4\t\turn:article:44\tDesign og handverk";
         interpreter.parse(inputLine);
 
-        Import.SubjectIndexDocument subject = restTemplate.getForObject("http://localhost:5000/subjects/urn:subject:4?language=nn", Import.SubjectIndexDocument.class);
+        SubjectIndexDocument subject = restTemplate.getForObject("http://localhost:5000/subjects/urn:subject:4?language=nn", SubjectIndexDocument.class);
         assertEquals("Design og handverk", subject.name);
     }
 
@@ -43,7 +44,7 @@ public class TSVInterpreterTest {
 
         interpreter.parse(inputLine);
 
-        Import.SubjectIndexDocument[] subjects = restTemplate.getForObject("http://localhost:5000/subjects", Import.SubjectIndexDocument[].class);
+        SubjectIndexDocument[] subjects = restTemplate.getForObject("http://localhost:5000/subjects", SubjectIndexDocument[].class);
         assertAnyTrue(subjects, s -> s.name.equals("Matematikk"));
         assertAnyTrue(subjects, s -> s.id.toString().equals("urn:subject:3"));
     }
@@ -55,7 +56,7 @@ public class TSVInterpreterTest {
         inputLine = "Subject\tMatematikk\t\turn:subject:6\t\turn:article:1\t";
         interpreter.parse(inputLine);
 
-        Import.SubjectIndexDocument subject = restTemplate.getForObject("http://localhost:5000/subjects/" + "urn:subject:6", Import.SubjectIndexDocument.class);
+        SubjectIndexDocument subject = restTemplate.getForObject("http://localhost:5000/subjects/" + "urn:subject:6", SubjectIndexDocument.class);
         assertEquals("urn:article:1", subject.contentUri.toString());
     }
 

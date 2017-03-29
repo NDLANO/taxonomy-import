@@ -1,8 +1,14 @@
 package no.ndla.taxonomy;
 
+import no.ndla.taxonomy.client.CreateSubjectCommand;
+import no.ndla.taxonomy.client.SubjectIndexDocument;
+import no.ndla.taxonomy.client.UpdateSubjectCommand;
+import no.ndla.taxonomy.client.UpdateSubjectTranslationCommand;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class TSVInterpreter {
     private static final String SUBJECT_TYPE = "Subject";
@@ -29,7 +35,7 @@ public class TSVInterpreter {
                 updateSubject(id, name, contentURI);
 
             } catch (Exception e) {
-                uri = createSubject(getString(columns[1]), id, contentURI);
+                uri = createSubject(id, name, contentURI);
             }
         }
 
@@ -40,23 +46,16 @@ public class TSVInterpreter {
 
     private void updateSubject(String id, String name, String contentURI) {
         String urlTypeBase = urlBase + "subjects/";
-        restTemplate.getForObject(urlTypeBase + id, Import.SubjectIndexDocument.class);
-        Import.UpdateSubjectCommand cmd = new Import.UpdateSubjectCommand();
+        restTemplate.getForObject(urlTypeBase + id, SubjectIndexDocument.class);
+        UpdateSubjectCommand cmd = new UpdateSubjectCommand();
         cmd.name = name;
         if (isNotBlank(contentURI)) cmd.contentUri = URI.create(contentURI);
         restTemplate.put(urlTypeBase + id, cmd);
     }
 
-    private URI createSubject(String name, String id, String contentURI) {
-        Import.CreateSubjectCommand cmd = new Import.CreateSubjectCommand();
-        if (null != id) {
-            if (!id.contains("urn:")) {
-                cmd.id = URI.create("urn:subject:" + id);
-            } else {
-                cmd.id = URI.create(id);
-            }
-
-        }
+    private URI createSubject(String id, String name, String contentURI) {
+        CreateSubjectCommand cmd = new CreateSubjectCommand();
+        cmd.id = getUri(id, "urn:subject");
         cmd.name = name;
         cmd.contentUri = URI.create(contentURI);
 
@@ -66,8 +65,15 @@ public class TSVInterpreter {
         return subjectid;
     }
 
+    private URI getUri(String id, String prefix) {
+        if (isBlank(id)) return null;
+
+        if (id.startsWith(prefix)) return URI.create(id);
+        else return URI.create(prefix + ":" + id);
+    }
+
     private void addTranslation(URI uri, String translatedName, String language) {
-        Import.UpdateSubjectTranslationCommand cmd = new Import.UpdateSubjectTranslationCommand();
+        UpdateSubjectTranslationCommand cmd = new UpdateSubjectTranslationCommand();
         cmd.name = translatedName;
         restTemplate.put(urlBase + "subjects/" + uri.toString() + "/translations/" + language, cmd);
     }
