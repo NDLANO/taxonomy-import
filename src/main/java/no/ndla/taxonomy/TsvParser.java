@@ -2,18 +2,19 @@ package no.ndla.taxonomy;
 
 import java.net.URI;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-public class TSVInterpreter {
+public class TsvParser implements Iterator<Entity> {
 
     private String[] lines;
     private int currentLine;
     private Map<String, Integer> columns = new HashMap<>();
 
-    public TSVInterpreter() {
+    public TsvParser() {
     }
 
     void init(String[] lines) {
@@ -59,10 +60,6 @@ public class TSVInterpreter {
         return getField(line, columnIndex, required);
     }
 
-    private String getField(String[] columns, int column) {
-        return getField(columns, column, false);
-    }
-
     private String getField(String[] columns, int column, boolean required) {
         if (columns.length > column && isNotBlank(columns[column])) {
             return getString(columns[column]);
@@ -75,6 +72,12 @@ public class TSVInterpreter {
         return value == null ? "" : value;
     }
 
+    @Override
+    public boolean hasNext() {
+        return lines.length > currentLine - 1;
+    }
+
+    @Override
     public Entity next() {
         String[] columns = lines[++currentLine].split("\t");
 
@@ -83,7 +86,7 @@ public class TSVInterpreter {
         result.type = getField(columns, "EntityType", true);
         result.name = getField(columns, "Name", true);
         result.id = getId(getField(columns, "Id", false), result.type);
-        result.contentUri = getUriField(columns, "ContentURI", false);
+        result.contentUri = getUriField(columns, "ContentUri", false);
         String nameNn = getField(columns, "Name-nn", false);
         if (isNotBlank(nameNn)) {
             Translation nn = new Translation();
@@ -91,6 +94,5 @@ public class TSVInterpreter {
             result.translations.put("nn", nn);
         }
         return result;
-
     }
 }

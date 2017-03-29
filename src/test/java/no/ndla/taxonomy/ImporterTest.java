@@ -77,7 +77,7 @@ public class ImporterTest {
         entity.contentUri = URI.create("urn:article:1");
         importer.doImport(entity);
 
-        SubjectIndexDocument subject = restTemplate.getForObject("http://localhost:5000/subjects/" + "urn:subject:6", SubjectIndexDocument.class);
+        SubjectIndexDocument subject = restTemplate.getForObject("http://localhost:5000/subjects/urn:subject:6", SubjectIndexDocument.class);
         assertEquals("urn:article:1", subject.contentUri.toString());
     }
 }

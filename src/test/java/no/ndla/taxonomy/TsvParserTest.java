@@ -6,9 +6,9 @@ import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
 
-public class TSVInterpreterTest {
+public class TsvParserTest {
 
-    TSVInterpreter interpreter = new TSVInterpreter();
+    TsvParser interpreter = new TsvParser();
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -16,7 +16,7 @@ public class TSVInterpreterTest {
     @Test
     public void first_line_contains_specification() throws Exception {
         String[] lines = new String[]{
-                "EntityType\tName\tId\tContentURI\tName-nn",
+                "EntityType\tName\tId\tContentUri\tName-nn",
                 "Topic\tProbability\turn:topic:1\turn:article:3\tSannsyn"
         };
 
@@ -70,7 +70,7 @@ public class TSVInterpreterTest {
     }
 
     private void init(String line) {
-        String defaultSpecification = "EntityType\tName\tResourceType\tId\tParentId\tContentURI\tnn";
+        String defaultSpecification = "EntityType\tName\tResourceType\tId\tParentId\tContentUri\tnn";
         interpreter.init(new String[]{defaultSpecification, line});
     }
 }
