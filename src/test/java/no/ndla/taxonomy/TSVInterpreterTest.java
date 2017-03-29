@@ -1,76 +1,76 @@
 package no.ndla.taxonomy;
 
-import no.ndla.taxonomy.client.SubjectIndexDocument;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.springframework.web.client.RestTemplate;
 
-import static no.ndla.taxonomy.TestUtils.assertAnyTrue;
 import static org.junit.Assert.assertEquals;
 
 public class TSVInterpreterTest {
 
-    RestTemplate restTemplate = new RestTemplate();
     TSVInterpreter interpreter = new TSVInterpreter();
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void can_add_a_subject() throws Exception {
+    public void first_line_contains_specification() throws Exception {
+        String[] lines = new String[]{
+                "EntityType\tName\tId\tContentURI\tName-nn",
+                "Topic\tProbability\turn:topic:1\turn:article:3\tSannsyn"
+        };
 
-        String inputLine = "Subject\tMatematikk\t\turn:subject:3\t\turn:article:1\t";
-        interpreter.parse(inputLine);
+        interpreter.init(lines);
+        Entity entity = interpreter.next();
 
-        SubjectIndexDocument subject = restTemplate.getForObject("http://localhost:5000/subjects/urn:subject:3", SubjectIndexDocument.class);
-        assertEquals("Matematikk", subject.name);
-        assertEquals("urn:article:1", subject.contentUri.toString());
+        assertEquals("Topic", entity.type);
+        assertEquals("Probability", entity.name);
+        assertEquals("urn:topic:1", entity.id.toString());
+        assertEquals("Sannsyn", entity.translations.get("nn").name);
     }
 
     @Test
-    public void can_add_translation_to_a_subject() throws Exception {
-        String inputLine = "Subject\tDesign og håndverk\t\turn:subject:4\t\turn:article:44\tDesign og handverk";
-        interpreter.parse(inputLine);
+    public void can_determine_id_prefix_for_topic() throws Exception {
+        String[] lines = new String[]{
+                "EntityType\tName\tId",
+                "Topic\tProbability\t1"
+        };
 
-        SubjectIndexDocument subject = restTemplate.getForObject("http://localhost:5000/subjects/urn:subject:4?language=nn", SubjectIndexDocument.class);
-        assertEquals("Design og handverk", subject.name);
+        interpreter.init(lines);
+        Entity entity = interpreter.next();
+
+        assertEquals("urn:topic:1", entity.id.toString());
     }
 
     @Test
-    public void can_add_existing_subject_without_updates() throws Exception {
-        String inputLine = "Subject\tMatematikk\t\turn:subject:5\t\turn:article:1\t";
-        interpreter.parse(inputLine);
+    public void can_determine_id_prefix_for_subject() throws Exception {
+        String[] lines = new String[]{
+                "EntityType\tName\tId",
+                "Subject\tMathematics\t1"
+        };
 
-        interpreter.parse(inputLine);
+        interpreter.init(lines);
+        Entity entity = interpreter.next();
 
-        SubjectIndexDocument[] subjects = restTemplate.getForObject("http://localhost:5000/subjects", SubjectIndexDocument[].class);
-        assertAnyTrue(subjects, s -> s.name.equals("Matematikk"));
-        assertAnyTrue(subjects, s -> s.id.toString().equals("urn:subject:3"));
-    }
-
-    @Test
-    public void can_update_subject() throws Exception {
-        String inputLine = "Subject\tMatematikk\t\turn:subject:6\t\t\t";
-        interpreter.parse(inputLine);
-        inputLine = "Subject\tMatematikk\t\turn:subject:6\t\turn:article:1\t";
-        interpreter.parse(inputLine);
-
-        SubjectIndexDocument subject = restTemplate.getForObject("http://localhost:5000/subjects/" + "urn:subject:6", SubjectIndexDocument.class);
-        assertEquals("urn:article:1", subject.contentUri.toString());
+        assertEquals("urn:subject:1", entity.id.toString());
     }
 
     @Test
     public void missing_entity_type_not_allowed() throws Exception {
-        String inputLine = "\t\tMatematikk\t\turn:subject:6";
+        init("\t\tMatematikk\t\turn:subject:6");
         expectedException.expect(MissingParameterException.class);
-        interpreter.parse(inputLine);
+        interpreter.next();
     }
 
     @Test
     public void missing_name_not_allowed() throws Exception {
-        String inputLine = "Subject\t\t\t\turn:subject:6\t\t\t";
+        init("Subject\t\t\t\turn:subject:6\t\t\t");
         expectedException.expect(MissingParameterException.class);
-        interpreter.parse(inputLine);
+        interpreter.next();
+    }
+
+    private void init(String line) {
+        String defaultSpecification = "EntityType\tName\tResourceType\tId\tParentId\tContentURI\tnn";
+        interpreter.init(new String[]{defaultSpecification, line});
     }
 }

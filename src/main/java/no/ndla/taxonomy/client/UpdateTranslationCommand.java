@@ -2,7 +2,7 @@ package no.ndla.taxonomy.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class UpdateSubjectTranslationCommand {
+public class UpdateTranslationCommand {
     @JsonProperty
     public String name;
 }

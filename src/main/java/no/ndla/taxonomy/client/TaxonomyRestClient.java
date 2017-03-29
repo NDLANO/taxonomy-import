@@ -1,49 +1,52 @@
 package no.ndla.taxonomy.client;
 
+import no.ndla.taxonomy.Translation;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 public class TaxonomyRestClient {
     RestTemplate restTemplate = new RestTemplate();
 
-    String urlBase = "http://localhost:5000/";
+    String urlBase = "http://localhost:5000";
 
-    public void updateSubject(String id, String name, String contentURI) {
-        String urlTypeBase = urlBase + "subjects/";
-        restTemplate.getForObject(urlTypeBase + id, SubjectIndexDocument.class);
+    public SubjectIndexDocument getSubject(URI id) {
+        String url = urlBase + "/subjects/" + id;
+        return restTemplate.getForObject(url, SubjectIndexDocument.class);
+    }
+
+    public URI updateSubject(URI id, String name, URI contentUri) {
+        URI location = URI.create("/subjects/" + id);
         UpdateSubjectCommand cmd = new UpdateSubjectCommand();
         cmd.name = name;
-        if (isNotBlank(contentURI)) cmd.contentUri = URI.create(contentURI);
-        restTemplate.put(urlTypeBase + id, cmd);
+        cmd.contentUri = contentUri;
+        restTemplate.put(urlBase + location, cmd);
+        return location;
     }
 
-    public URI createSubject(String id, String name, String contentURI) {
+    public URI createSubject(URI id, String name, URI contentUri) {
         CreateSubjectCommand cmd = new CreateSubjectCommand();
-        cmd.id = getUri(id, "urn:subject");
+        cmd.id = id;
         cmd.name = name;
-        cmd.contentUri = URI.create(contentURI);
+        cmd.contentUri = contentUri;
 
-        URI uri = restTemplate.postForLocation(urlBase + "subjects", cmd);
-        URI subjectid = URI.create(uri.toString().substring(uri.toString().lastIndexOf("/") + 1));
+        URI location = restTemplate.postForLocation(urlBase + "subjects", cmd);
+        URI subjectid = getId(location);
         System.out.println("created: " + subjectid);
-        return subjectid;
+        return location;
     }
 
-    private URI getUri(String id, String prefix) {
-        if (isBlank(id)) return null;
-
-        if (id.startsWith(prefix)) return URI.create(id);
-        else return URI.create(prefix + ":" + id);
+    private URI getId(URI location) {
+        String locationString = location.toString();
+        String id = locationString.substring(locationString.lastIndexOf("/") + 1);
+        return URI.create(id);
     }
 
-    public void addTranslation(URI uri, String translatedName, String language) {
-        UpdateSubjectTranslationCommand cmd = new UpdateSubjectTranslationCommand();
-        cmd.name = translatedName;
-        restTemplate.put(urlBase + "subjects/" + uri.toString() + "/translations/" + language, cmd);
+
+    public void addTranslation(URI location, String language, Translation translation) {
+        UpdateTranslationCommand cmd = new UpdateTranslationCommand();
+        cmd.name = translation.name;
+        restTemplate.put(urlBase + location + "/translations/" + language, cmd);
     }
 
 }
