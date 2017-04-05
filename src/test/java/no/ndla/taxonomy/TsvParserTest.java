@@ -1,8 +1,14 @@
 package no.ndla.taxonomy;
 
+import no.ndla.taxonomy.client.SubjectIndexDocument;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import java.net.URI;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,6 +18,10 @@ public class TsvParserTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+    Entity subject = new Entity() {{
+        name = "Matematikk";
+        id = URI.create("urn:subject:1");
+    }};
 
     @Test
     public void first_lines_contains_specification() throws Exception {
@@ -21,7 +31,7 @@ public class TsvParserTest {
                 "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
         };
 
-        parser.init(lines, "Matematikk");
+        parser.init(lines, subject);
         Entity entity = parser.next();
 
         assertEquals("Tall og algebra", entity.name);
@@ -74,11 +84,125 @@ public class TsvParserTest {
         assertEquals("125735", entity.nodeId);
     }
 
+    @Test
+    public void level_one_topic_has_parent() throws Exception {
+        init("Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
+
+        Entity entity = parser.next();
+
+        assertEquals(subject.id, entity.parent.id);
+    }
+
+    @Test
+    public void resource_can_have_level_one_topic_parent() throws Exception {
+        String[] lines = {
+                "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\t\t\tTall og algebra fasit YF	Tal og algebra fasit YF	http://red.ndla.no/nb/node/138016?fag=54	Vedlegg	1T-YF	Kjernestoff	1T-ST	Tilleggsstoff										"
+        };
+        init(lines);
+
+        Entity topic = parser.next();
+        topic.setId("urn:topic:1");
+        Entity entity = parser.next();
+
+        assertEquals(topic.id, entity.parent.id);
+    }
+
+    @Test
+    public void resource_can_have_level_two_topic_parent() throws Exception {
+        String[] lines = {
+                "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\t\t\tTall og algebra fasit YF	Tal og algebra fasit YF	http://red.ndla.no/nb/node/138016?fag=54	Vedlegg	1T-YF	Kjernestoff	1T-ST	Tilleggsstoff										"
+        };
+        init(lines);
+
+        Entity topic = parser.next();
+        topic.setId("urn:topic:1");
+        Entity levelTwo = parser.next();
+        levelTwo.setId("urn:topic:2");
+        Entity result = parser.next();
+
+        assertEquals(levelTwo.id, result.parent.id);
+    }
+
+    @Test
+    public void resource_can_have_level_three_topic_parent() throws Exception {
+        String[] lines = {
+                "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\t\tTallmengder\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\t\t\tTall og algebra fasit YF	Tal og algebra fasit YF	http://red.ndla.no/nb/node/138016?fag=54	Vedlegg	1T-YF	Kjernestoff	1T-ST	Tilleggsstoff										"
+        };
+        init(lines);
+
+        Entity topic = parser.next();
+        topic.setId("urn:topic:1");
+        Entity levelTwo = parser.next();
+        levelTwo.setId("urn:topic:2");
+        Entity levelThree = parser.next();
+        levelThree.setId("urn:topic:3");
+        Entity result = parser.next();
+
+        assertEquals(levelThree.id, result.parent.id);
+    }
+
+    @Test
+    public void top_level_topic_removes_subtopics_in_parent_hierarchy() throws Exception {
+        String[] lines = {
+                "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\t\tTallmengder\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "Geometri\t\t\t\t\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\t\t\tGeometri fasit YF\tGeometri fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54															"
+        };
+        init(lines);
+
+        Entity topic = parser.next();
+        topic.setId("urn:topic:1");
+        Entity levelTwo = parser.next();
+        levelTwo.setId("urn:topic:2");
+        Entity levelThree = parser.next();
+        levelThree.setId("urn:topic:3");
+        topic = parser.next();
+        topic.setId("urn:topic:4");
+        Entity result = parser.next();
+
+        assertEquals(topic.id, result.parent.id);
+    }
+
+    @Test
+    public void level_two_topic_removes_subtopics_in_parent_hierarchy() throws Exception {
+        String[] lines = {
+                "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\t\tTallmengder\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\tPotenser\t\t\t\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\t\t\tPotenser og rotuttrykk\t\thttp://red.ndla.no/nb/node/138016?fag=54\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+        };
+        init(lines);
+
+        Entity topic = parser.next();
+        topic.setId("urn:topic:1");
+        Entity levelTwo = parser.next();
+        levelTwo.setId("urn:topic:2");
+        Entity levelThree = parser.next();
+        levelThree.setId("urn:topic:3");
+        levelTwo = parser.next();
+        levelTwo.setId("urn:topic:4");
+        Entity result = parser.next();
+
+        assertEquals(levelTwo.id, result.parent.id);
+    }
+
+    private void init(String[] lines) {
+        String[] headerLines = new String[]{"\t\t\t\t\t\t\tFilter 1\t\tFilter 2\t\tFilter 3\t\tFilter 4\t\tFilter 5\t\tFilter 6\t\tFilter 7",
+                "Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tnn\tLenke til gammelt system\tRessurstype\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans"};
+                parser.init(ArrayUtils.addAll(headerLines, lines), subject);
+
+    }
 
     private void init(String line) {
-        String filterHeader = "\t\t\t\t\t\t\tFilter 1\t\tFilter 2\t\tFilter 3\t\tFilter 4\t\tFilter 5\t\tFilter 6\t\tFilter 7";
-        String specification = "Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tnn\tLenke til gammelt system\tRessurstype\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans";
-
-        parser.init(new String[]{filterHeader, specification, line}, "Matematikk");
+        init(new String[]{line});
     }
 }

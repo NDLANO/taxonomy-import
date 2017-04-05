@@ -10,19 +10,24 @@ public class TsvParser implements Iterator<Entity> {
 
     private String[] lines;
     private int currentLine;
-    private Map<String, Integer> columns = new HashMap<>();
+    private Map<String, Integer> columnMap = new HashMap<>();
+    private Entity currentSubject = null;
+    private Entity currentLevelOneTopic = null;
+    private Entity currentLevelTwoTopic = null;
+    private Entity currentLevelThreeTopic = null;
 
     public TsvParser() {
     }
 
-    void init(String[] lines, String subjectName) {
+    void init(String[] lines, Entity subject) {
         this.lines = lines;
-        columns.clear();
+        columnMap.clear();
         String[] specification = lines[1].split("\t");
         for (int i = 0; i < specification.length; i++) {
-            columns.put(specification[i], i);
+            columnMap.put(specification[i], i);
         }
         this.currentLine = 0;
+        this.currentSubject = subject;
     }
 
     @Override
@@ -37,13 +42,14 @@ public class TsvParser implements Iterator<Entity> {
         getEntityName(columns, result);
         getTranslatedName(columns, result);
         getNodeId(columns, result);
+        getParent(result);
 
         return result;
     }
 
     private String getField(String[] line, String columnName) {
-        if (!columns.containsKey(columnName)) return null;
-        int columnIndex = columns.get(columnName);
+        if (!columnMap.containsKey(columnName)) return null;
+        int columnIndex = columnMap.get(columnName);
         return getField(line, columnIndex);
     }
 
@@ -63,6 +69,20 @@ public class TsvParser implements Iterator<Entity> {
         return lines.length > currentLine - 1;
     }
 
+    private void getParent(Entity result) {
+        if (currentLevelThreeTopic != null && currentLevelThreeTopic != result) {
+            result.parent = currentLevelThreeTopic;
+        }
+        else if (currentLevelTwoTopic != null && currentLevelTwoTopic != result) {
+            result.parent = currentLevelTwoTopic;
+        }
+        else if (currentLevelOneTopic != null && currentLevelOneTopic != result) {
+            result.parent = currentLevelOneTopic;
+        } else {
+            result.parent = currentSubject;
+        }
+    }
+
     private void getEntityName(String[] columns, Entity result) {
         String topicLevel1 = getField(columns, "Emne nivå 1");
         String topicLevel2 = getField(columns, "Emne nivå 2");
@@ -73,20 +93,25 @@ public class TsvParser implements Iterator<Entity> {
             throw new MissingParameterException("Entity must be named");
         }
 
-
         if (isNotBlank(topicLevel1)) {
             result.type = "Topic";
             result.name = topicLevel1;
+            currentLevelOneTopic = result;
+            currentLevelTwoTopic = null;
+            currentLevelThreeTopic = null;
         }
 
         if (isNotBlank(topicLevel2)) {
             result.type = "Topic";
             result.name = topicLevel2;
+            currentLevelTwoTopic = result;
+            currentLevelThreeTopic = null;
         }
 
         if (isNotBlank(topicLevel3)) {
             result.type = "Topic";
             result.name = topicLevel3;
+            currentLevelThreeTopic = result;
         }
 
         if (isNotBlank(resourceName)) {
