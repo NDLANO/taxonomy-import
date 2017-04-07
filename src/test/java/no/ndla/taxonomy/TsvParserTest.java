@@ -1,20 +1,17 @@
 package no.ndla.taxonomy;
 
-import no.ndla.taxonomy.client.SubjectIndexDocument;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
 public class TsvParserTest {
 
-    TsvParser parser = new TsvParser();
+    TsvParser parser;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -31,7 +28,7 @@ public class TsvParserTest {
                 "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
         };
 
-        parser.init(lines, subject);
+        parser = new TsvParser(lines, subject);
         Entity entity = parser.next();
 
         assertEquals("Tall og algebra", entity.name);
@@ -54,7 +51,7 @@ public class TsvParserTest {
 
     @Test
     public void can_get_nodeid_from_fagstoff_type_url() throws Exception {
-        init( "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
+        init("Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
 
         Entity entity = parser.next();
         assertEquals("165193", entity.nodeId);
@@ -198,8 +195,7 @@ public class TsvParserTest {
     private void init(String[] lines) {
         String[] headerLines = new String[]{"\t\t\t\t\t\t\tFilter 1\t\tFilter 2\t\tFilter 3\t\tFilter 4\t\tFilter 5\t\tFilter 6\t\tFilter 7",
                 "Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tnn\tLenke til gammelt system\tRessurstype\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans"};
-                parser.init(ArrayUtils.addAll(headerLines, lines), subject);
-
+        parser = new TsvParser(ArrayUtils.addAll(headerLines, lines), subject);
     }
 
     private void init(String line) {

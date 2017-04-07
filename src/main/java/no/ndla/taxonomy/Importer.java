@@ -1,6 +1,5 @@
 package no.ndla.taxonomy;
 
-import com.sun.org.apache.regexp.internal.RE;
 import no.ndla.taxonomy.client.TaxonomyRestClient;
 
 import java.net.URI;
@@ -11,8 +10,11 @@ public class Importer {
     public static final String TOPIC_TYPE = "Topic";
     public static final String RESOURCE_TYPE = "Resource";
 
-    private TaxonomyRestClient restClient = new TaxonomyRestClient();
+    private TaxonomyRestClient restClient;
 
+    public Importer(TaxonomyRestClient restClient) {
+        this.restClient = restClient;
+    }
 
     void doImport(Entity entity) {
         URI location = importEntity(entity);
@@ -22,7 +24,7 @@ public class Importer {
             importSubjectTopic(entity);
         } else if (entity.parent != null && entity.parent.type.equals(TOPIC_TYPE) && entity.type.equals(TOPIC_TYPE)) {
             importTopicSubtopic(entity);
-        } else if (entity.parent != null && entity.parent.type.equals(TOPIC_TYPE) && entity.type.equals(RESOURCE_TYPE )) {
+        } else if (entity.parent != null && entity.parent.type.equals(TOPIC_TYPE) && entity.type.equals(RESOURCE_TYPE)) {
             importTopicResource(entity);
         }
 
@@ -33,13 +35,14 @@ public class Importer {
 
     private void importTopicResource(Entity entity) {
         try {
-            restClient.addTopicResource(entity);
-        } catch (Exception e) {}
+            restClient.addTopicResource(entity.parent.id, entity.id);
+        } catch (Exception e) {
+        }
     }
 
     private void importTopicSubtopic(Entity entity) {
         try {
-            restClient.addTopicSubtopic(entity);
+            restClient.addTopicSubtopic(entity.parent.id, entity.id);
         } catch (Exception e) {
         }
     }
@@ -67,7 +70,7 @@ public class Importer {
 
     private void importSubjectTopic(Entity entity) {
         try {
-            restClient.addSubjectTopic(entity);
+            restClient.addSubjectTopic(entity.parent.id, entity.id);
         } catch (Exception e) {
         }
     }

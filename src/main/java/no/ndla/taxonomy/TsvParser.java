@@ -8,35 +8,37 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TsvParser implements Iterator<Entity> {
 
-    private String[] lines;
-    private int currentLine;
+    private StringIterator lines;
     private Map<String, Integer> columnMap = new HashMap<>();
     private Entity currentSubject = null;
     private Entity currentLevelOneTopic = null;
     private Entity currentLevelTwoTopic = null;
     private Entity currentLevelThreeTopic = null;
 
-    public TsvParser() {
+    public TsvParser(String[] lines, Entity subject) {
+        this(new ArrayStringIterator(lines), subject);
     }
 
-    void init(String[] lines, Entity subject) {
+    public TsvParser(StringIterator lines, Entity subject) {
         this.lines = lines;
+        this.currentSubject = subject;
+        initColumnMap();
+    }
+
+    private void initColumnMap() {
         columnMap.clear();
-        String[] specification = lines[1].split("\t");
+        this.lines.next();
+        String[] specification = this.lines.next().split("\t");
         for (int i = 0; i < specification.length; i++) {
             columnMap.put(specification[i], i);
         }
-        this.currentLine = 0;
-        this.currentSubject = subject;
     }
 
     @Override
     public Entity next() {
-        String[] columns = lines[++currentLine].split("\t");
-        if (lines[currentLine].startsWith("Emne niv")) {
-            columns = lines[++currentLine].split("\t");
-        }
+        String line = lines.next();
 
+        String[] columns = line.split("\t");
         Entity result = new Entity();
 
         getEntityName(columns, result);
@@ -66,17 +68,15 @@ public class TsvParser implements Iterator<Entity> {
 
     @Override
     public boolean hasNext() {
-        return lines.length > currentLine - 1;
+        return lines.hasNext();
     }
 
     private void getParent(Entity result) {
         if (currentLevelThreeTopic != null && currentLevelThreeTopic != result) {
             result.parent = currentLevelThreeTopic;
-        }
-        else if (currentLevelTwoTopic != null && currentLevelTwoTopic != result) {
+        } else if (currentLevelTwoTopic != null && currentLevelTwoTopic != result) {
             result.parent = currentLevelTwoTopic;
-        }
-        else if (currentLevelOneTopic != null && currentLevelOneTopic != result) {
+        } else if (currentLevelOneTopic != null && currentLevelOneTopic != result) {
             result.parent = currentLevelOneTopic;
         } else {
             result.parent = currentSubject;
@@ -90,7 +90,7 @@ public class TsvParser implements Iterator<Entity> {
         String resourceName = getField(columns, "Læringsressurs");
 
         if (!(isNotBlank(topicLevel1) || isNotBlank(topicLevel2) || isNotBlank(topicLevel3) || isNotBlank(resourceName))) {
-            throw new MissingParameterException("Entity must be named");
+            throw new MissingParameterException("Entity must be named", lines.getLineNumber());
         }
 
         if (isNotBlank(topicLevel1)) {
@@ -134,6 +134,35 @@ public class TsvParser implements Iterator<Entity> {
             result.translations.put("nn", new Translation() {{
                 name = nn;
             }});
+        }
+    }
+
+    public static abstract class StringIterator implements Iterator<String> {
+        public abstract int getLineNumber();
+    }
+
+    private static class ArrayStringIterator extends StringIterator {
+        private int i;
+        private final String[] lines;
+
+        public ArrayStringIterator(String[] lines) {
+            this.lines = lines;
+            i = -1;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return i + 1 <= lines.length - 1;
+        }
+
+        @Override
+        public String next() {
+            return lines[++i];
+        }
+
+        @Override
+        public int getLineNumber() {
+            return i;
         }
     }
 }

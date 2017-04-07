@@ -1,41 +1,41 @@
 package no.ndla.taxonomy.client;
 
-import no.ndla.taxonomy.Entity;
 import no.ndla.taxonomy.Importer;
 import no.ndla.taxonomy.Translation;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TaxonomyRestClient {
     RestTemplate restTemplate = new RestTemplate();
 
-    String urlBase = "http://localhost:5000";
-    Map<String, String> controllerNames = Stream.of(
-            new AbstractMap.SimpleEntry<>(Importer.SUBJECT_TYPE, "/subjects"),
-            new AbstractMap.SimpleEntry<>(Importer.TOPIC_TYPE, "/topics"),
-            new AbstractMap.SimpleEntry<String, String>(Importer.RESOURCE_TYPE, "/resources"))
-            .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+    private String urlBase = "http://localhost:5000";
+    private static final Map<String, String> controllerNames = new HashMap<String, String>() {
+        {
+            put(Importer.SUBJECT_TYPE, "/subjects");
+            put(Importer.TOPIC_TYPE, "/topics");
+            put(Importer.RESOURCE_TYPE, "/resources");
+        }
+    };
 
-
-
-        public SubjectIndexDocument getSubject(URI id) {
+    public SubjectIndexDocument getSubject(URI id) {
         String url = urlBase + "/subjects/" + id;
         return restTemplate.getForObject(url, SubjectIndexDocument.class);
     }
 
     public URI updateEntity(URI id, String name, URI contentUri, String entityType) {
-        URI location = URI.create(controllerNames.get(entityType) + "/" + id);
+        URI location = getLocation(id, entityType);
         UpdateSubjectCommand cmd = new UpdateSubjectCommand();
         cmd.name = name;
         cmd.contentUri = contentUri;
         restTemplate.put(urlBase + location, cmd);
         return location;
+    }
+
+    private URI getLocation(URI id, String entityType) {
+        return URI.create(controllerNames.get(entityType) + "/" + id);
     }
 
     public URI createSubject(URI id, String name, URI contentUri) {
@@ -56,7 +56,6 @@ public class TaxonomyRestClient {
         return URI.create(id);
     }
 
-
     public void addTranslation(URI location, String language, Translation translation) {
         UpdateTranslationCommand cmd = new UpdateTranslationCommand();
         cmd.name = translation.name;
@@ -68,14 +67,13 @@ public class TaxonomyRestClient {
         cmd.name = name;
         cmd.id = id;
         cmd.contentUri = contentUri;
-        URI location = restTemplate.postForLocation(urlBase + "/topics", cmd);
-        return location;
+        return restTemplate.postForLocation(urlBase + "/topics", cmd);
     }
 
-    public void addSubjectTopic(Entity entity) {
+    public void addSubjectTopic(URI subjectId, URI topicId) {
         AddTopicToSubjectCommand cmd = new AddTopicToSubjectCommand();
-        cmd.subjectid = entity.parent.id;
-        cmd.topicid = entity.id;
+        cmd.subjectid = subjectId;
+        cmd.topicid = topicId;
         restTemplate.postForLocation(urlBase + "/subject-topics", cmd);
     }
 
@@ -84,10 +82,10 @@ public class TaxonomyRestClient {
         return restTemplate.getForObject(url, TopicIndexDocument.class);
     }
 
-    public void addTopicSubtopic(Entity entity) {
+    public void addTopicSubtopic(URI topicId, URI subtopicId) {
         AddSubtopicToTopicCommand cmd = new AddSubtopicToTopicCommand();
-        cmd.topicid = entity.parent.id;
-        cmd.subtopicid = entity.id;
+        cmd.topicid = topicId;
+        cmd.subtopicid = subtopicId;
         restTemplate.postForLocation(urlBase + "/topic-subtopics", cmd);
     }
 
@@ -100,10 +98,10 @@ public class TaxonomyRestClient {
         return restTemplate.postForLocation(urlBase + "/resources", cmd);
     }
 
-    public void addTopicResource(Entity entity) {
+    public void addTopicResource(URI topicId, URI resourceId) {
         AddResourceToTopicCommand cmd = new AddResourceToTopicCommand();
-        cmd.resourceid = entity.id;
-        cmd.topicid = entity.parent.id;
+        cmd.resourceid = resourceId;
+        cmd.topicid = topicId;
 
         restTemplate.postForLocation(urlBase + "/topic-resources", cmd);
     }

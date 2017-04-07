@@ -1,7 +1,6 @@
 package no.ndla.taxonomy;
 
 import no.ndla.taxonomy.client.*;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.web.client.RestTemplate;
 
@@ -11,7 +10,7 @@ import static no.ndla.taxonomy.TestUtils.assertAnyTrue;
 import static org.junit.Assert.assertEquals;
 
 public class ImporterTest {
-    private Importer importer = new Importer();
+    private Importer importer = new Importer(new TaxonomyRestClient());
     private RestTemplate restTemplate = new RestTemplate();
 
     @Test
