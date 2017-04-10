@@ -166,4 +166,18 @@ public class ImporterTest {
         TopicSubtopicIndexDocument[] topicSubtopics = restTemplate.getForObject(baseUrl + "/topic-subtopics", TopicSubtopicIndexDocument[].class);
         assertAnyTrue(topicSubtopics, t -> t.topicid.equals(parentEntity.id) && t.subtopicid.equals(topicEntity.id));
     }
+
+    @Test
+    public void nodeId_becomes_versioned_id_for_topic() throws Exception {
+        Entity entity = new Entity() {{
+            type = "Topic";
+            name = "Geometri";
+            nodeId = "12345";
+        }};
+
+        importer.doImport(entity);
+
+        TopicIndexDocument topic = restTemplate.getForObject(baseUrl + "/v1/topics/urn:topic:1:12345", TopicIndexDocument.class);
+        assertEquals(entity.name, topic.name);
+    }
 }

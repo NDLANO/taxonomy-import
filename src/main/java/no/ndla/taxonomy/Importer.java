@@ -1,10 +1,11 @@
 package no.ndla.taxonomy;
 
-import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
 import no.ndla.taxonomy.client.ResourceTypeIndexDocument;
 import no.ndla.taxonomy.client.TaxonomyRestClient;
+import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,22 +75,53 @@ public class Importer {
     }
 
     private URI importResource(Entity entity) {
-        if (null == entity.id) return createResource(entity);
-
-        try {
-            ResourceIndexDocument resource = restClient.getResource(entity.id);
-            if (entity.contentUri == null) entity.contentUri = resource.contentUri;
-            if (entity.name == null) entity.name = resource.name;
-            return updateResource(entity);
-        } catch (Exception e) {
+        if (null != entity.id) {
+            try {
+                ResourceIndexDocument resource = restClient.getResource(entity.id);
+                System.out.println("Updating resource: " + entity.id);
+                URI location = updateResource(entity, resource);
+                //get rts for resource, check if replace should be done
+                //updateResourceResourceTypeConnections(entity);
+                return location;
+            } catch (Exception e) {
+                if (entity.nodeId != null && entity.id == null) {
+                    entity.id = URI.create("urn:resource:1:" + entity.nodeId);
+                }
+                System.out.println("Creating resource: " + entity.id + " with nodeId: " + entity.nodeId);
+                return createResource(entity);
+            }
+        } else {
+            if (entity.nodeId != null) {
+                entity.id = URI.create("urn:resource:1:" + entity.nodeId);
+                try {
+                    ResourceIndexDocument resource = restClient.getResource(entity.id);
+                    System.out.println("Updating resource: " + entity.id);
+                    return updateResource(entity, resource);
+                } catch (Exception e) {
+                    System.out.println("Creating resource: " + entity.id);
+                    return createResource(entity);
+                }
+            }
+            System.out.println("Creating resource: " + entity.id);
             return createResource(entity);
         }
-
     }
 
-    private URI updateResource(Entity entity) {
-        URI location = restClient.updateEntity(entity.id, entity.name, entity.contentUri, RESOURCE_TYPE);
+    private void updateResourceResourceTypeConnections(Entity entity) {
+        List<ResourceTypeIndexDocument> currentResourceTypes = Arrays.asList(restClient.getResourceTypesForResource(entity.id));
+        boolean update = false;
+        for (Entity.ResourceType resourceType : entity.resourceTypes) {
+            if (!currentResourceTypes.contains(resourceType)) {
+                update = true;
+            }
+        }
+    }
 
+    private URI updateResource(Entity entity, ResourceIndexDocument resource) {
+        if (entity.contentUri == null) entity.contentUri = resource.contentUri;
+        if (entity.name == null) entity.name = resource.name;
+        URI location = restClient.updateEntity(entity.id, entity.name, entity.contentUri, RESOURCE_TYPE);
+        return location;
     }
 
     private URI createResource(Entity entity) {
@@ -139,19 +171,36 @@ public class Importer {
         URI location;
         try {
             restClient.getTopic(entity.id);
+            System.out.println("Updating topic: " + entity.id);
             location = restClient.updateEntity(entity.id, entity.name, entity.contentUri, TOPIC_TYPE);
         } catch (Exception e) {
-            location = restClient.createTopic(entity.id, entity.name, entity.contentUri);
+            if (entity.nodeId != null && entity.id == null) {
+                entity.id = URI.create("urn:topic:1:" + entity.nodeId);
+                try {
+                    restClient.getTopic(entity.id);
+                    System.out.println("Updating topic: " + entity.id);
+                    location = restClient.updateEntity(entity.id, entity.name, entity.contentUri, TOPIC_TYPE);
+                } catch (Exception ex) {
+                    System.out.println("Creating topic: " + entity.id);
+                    location = restClient.createTopic(entity.id, entity.name, entity.contentUri);
+                }
+            } else {
+                System.out.println("Creating topic: " + entity.id);
+                location = restClient.createTopic(entity.id, entity.name, entity.contentUri);
+            }
         }
         return location;
     }
 
     private URI importSubject(Entity entity) {
         URI location;
+
         try {
             restClient.getSubject(entity.id);
+            System.out.println("Updating subject: " + entity.id);
             location = restClient.updateEntity(entity.id, entity.name, entity.contentUri, SUBJECT_TYPE);
         } catch (Exception e) {
+            System.out.println("Creating subject: " + entity.id + " with name " + entity.name);
             location = restClient.createSubject(entity.id, entity.name, entity.contentUri);
         }
         return location;

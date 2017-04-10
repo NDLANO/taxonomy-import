@@ -141,4 +141,10 @@ public class TaxonomyRestClient {
         cmd.resourceTypeId = resourceTypeId;
         return restTemplate.postForLocation(urlBase + "/v1/resource-resourcetypes", cmd);
     }
+
+    public ResourceTypeIndexDocument[] getResourceTypesForResource(URI id) {
+        String url = urlBase + "/resources/" + id + "/resource-types";
+        return restTemplate.getForObject(url, ResourceTypeIndexDocument[].class);
+    }
+
 }

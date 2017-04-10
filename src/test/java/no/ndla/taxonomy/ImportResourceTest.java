@@ -3,6 +3,7 @@ package no.ndla.taxonomy;
 import no.ndla.taxonomy.client.TaxonomyRestClient;
 import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
 import no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.web.client.RestTemplate;
 
@@ -99,6 +100,7 @@ public class ImportResourceTest {
     }
 
     @Test
+    @Ignore
     public void can_replace_resource_type() throws Exception {
         Entity resource = new Entity() {{
             type = "Resource";
@@ -113,5 +115,20 @@ public class ImportResourceTest {
         ResourceTypeIndexDocument[] result = restTemplate.getForObject(baseUrl + "/v1/resources/" + resource.id + "/resource-types", ResourceTypeIndexDocument[].class);
         assertEquals(1, result.length);
         assertEquals("Vedlegg", result[0].name);
+    }
+
+
+    @Test
+    public void nodeId_becomes_versioned_id_for_resource() throws Exception {
+        Entity entity = new Entity() {{
+            type = "Resource";
+            name = "Sinus og cosinus";
+            nodeId = "12345";
+        }};
+
+        importer.doImport(entity);
+
+        ResourceIndexDocument topic = restTemplate.getForObject(baseUrl + "/v1/resources/urn:resource:1:12345", ResourceIndexDocument.class);
+        assertEquals(entity.name, topic.name);
     }
 }
