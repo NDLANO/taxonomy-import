@@ -121,6 +121,10 @@ public class Importer {
         if (entity.contentUri == null) entity.contentUri = resource.contentUri;
         if (entity.name == null) entity.name = resource.name;
         URI location = restClient.updateEntity(entity.id, entity.name, entity.contentUri, RESOURCE_TYPE);
+
+        ResourceTypeIndexDocument[] resourceTypesForResource = restClient.getResourceTypesForResource(entity.id);
+        if (resourceTypesForResource.length == 0) addResourceTypesToResource(entity.id, entity.resourceTypes);
+
         return location;
     }
 
@@ -141,7 +145,7 @@ public class Importer {
 
     private URI getOrCreateResourceTypeId(Entity.ResourceType resourceType) {
         updateResourceTypeCache();
-        if (!resourceTypeCache.containsKey(resourceType)) {
+        if (!resourceTypeCache.containsKey(resourceType.name)) {
             URI location = restClient.createResourceType(resourceType.id, resourceType.name);
             URI id = getId(location);
             resourceType.id = id;

@@ -7,6 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,16 +21,16 @@ public class ImporterApplication {
 
 
     @Parameter(names = {"-e", "--endpoint"})
-    private String endpoint = "http://localhost:5000";
+    private static String endpoint = "http://localhost:5000";
 
     @Parameter(names = {"-i", "--subject-id"}, required = true)
-    private String subjectId;
+    private static String subjectId;
 
     @Parameter(names = {"-n", "--subject-name"})
-    private String subjectName;
+    private static String subjectName;
 
     @Parameter(names = "--help", help = true)
-    private boolean help;
+    private static boolean help;
 
     public static void main(String[] args) throws Exception {
 
@@ -76,8 +77,13 @@ public class ImporterApplication {
     }
 
     @Bean
-    public TaxonomyRestClient restClient() {
-        return new TaxonomyRestClient();
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
+    @Bean
+    public TaxonomyRestClient restClient(RestTemplate restTemplate) {
+        return new TaxonomyRestClient(endpoint, restTemplate);
     }
 
     @Bean

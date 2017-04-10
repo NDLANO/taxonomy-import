@@ -11,8 +11,8 @@ import static no.ndla.taxonomy.TestUtils.assertAnyTrue;
 import static no.ndla.taxonomy.TestUtils.baseUrl;
 
 public class ImportSubjectTest {
-    private Importer importer = new Importer(new TaxonomyRestClient());
     private RestTemplate restTemplate = new RestTemplate();
+    private Importer importer = new Importer(new TaxonomyRestClient("http://localhost:5000", restTemplate));
 
     @Test
     public void can_add_topic_with_subject_parent() throws Exception {

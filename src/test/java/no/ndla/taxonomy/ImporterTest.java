@@ -14,8 +14,8 @@ import static no.ndla.taxonomy.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 
 public class ImporterTest {
-    private Importer importer = new Importer(new TaxonomyRestClient());
     private RestTemplate restTemplate = new RestTemplate();
+    private Importer importer = new Importer(new TaxonomyRestClient("http://localhost:5000", restTemplate));
 
     @Test
     public void can_add_a_subject() throws Exception {

@@ -14,10 +14,9 @@ import static no.ndla.taxonomy.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 
 public class ImportResourceTest {
-    private Importer importer = new Importer(new TaxonomyRestClient());
     private RestTemplate restTemplate = new RestTemplate();
-
-
+    private Importer importer = new Importer(new TaxonomyRestClient("http://localhost:5000", restTemplate));
+    
     @Test
     public void can_add_resource() throws Exception {
         Entity entity = new Entity() {{

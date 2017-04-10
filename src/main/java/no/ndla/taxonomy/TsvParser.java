@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TsvParser implements Iterator<Entity> {
@@ -27,8 +28,10 @@ public class TsvParser implements Iterator<Entity> {
 
     private void initColumnMap() {
         columnMap.clear();
-        this.lines.next();
-        String[] specification = this.lines.next().split("\t");
+        String line = "";
+        while (!(line.contains("Emne") || line.contains("Læringsressurs"))) line = lines.next();
+
+        String[] specification = line.split("\t");
         for (int i = 0; i < specification.length; i++) {
             columnMap.put(specification[i], i);
         }
@@ -45,9 +48,10 @@ public class TsvParser implements Iterator<Entity> {
         getTranslatedName(columns, result);
         getNodeId(columns, result);
         getParent(result);
-
+        getResourceType(columns, result);
         return result;
     }
+
 
     private String getField(String[] line, String columnName) {
         if (!columnMap.containsKey(columnName)) return null;
@@ -122,6 +126,8 @@ public class TsvParser implements Iterator<Entity> {
 
     private void getNodeId(String[] columns, Entity result) {
         String urlString = getField(columns, "Lenke til gammelt system");
+        if (isBlank(urlString)) return;
+
         String[] urlParts = urlString.split("/");
         String parametersString = urlParts[urlParts.length - 1];
         String[] parameters = parametersString.split("\\?");
@@ -130,11 +136,19 @@ public class TsvParser implements Iterator<Entity> {
 
     private void getTranslatedName(String[] columns, Entity result) {
         String nn = getField(columns, "nn");
-        if (isNotBlank(nn)) {
-            result.translations.put("nn", new Translation() {{
-                name = nn;
-            }});
-        }
+        if (isBlank(nn)) return;
+
+        result.translations.put("nn", new Translation() {{
+            name = nn;
+        }});
+    }
+
+
+    private void getResourceType(String[] columns, Entity result) {
+        String resourceType = getField(columns, "Ressurstype");
+        if (isBlank(resourceType)) return;
+
+        result.resourceTypes.add(new Entity.ResourceType(resourceType));
     }
 
     public static abstract class StringIterator implements Iterator<String> {

@@ -21,9 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TaxonomyRestClient {
-    RestTemplate restTemplate = new RestTemplate();
+    RestTemplate restTemplate;
+    private String urlBase;
 
-    private String urlBase = "http://localhost:5000";
+    public TaxonomyRestClient(String urlBase, RestTemplate restTemplate) {
+        this.urlBase = urlBase;
+        this.restTemplate = restTemplate;
+    }
+
     private static final Map<String, String> controllerNames = new HashMap<String, String>() {
         {
             put(Importer.SUBJECT_TYPE, "/subjects");

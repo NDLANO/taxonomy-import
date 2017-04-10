@@ -192,10 +192,27 @@ public class TsvParserTest {
         assertEquals(levelTwo.id, result.parent.id);
     }
 
+
+    @Test
+    public void can_read_resource_type() throws Exception {
+        init("Læringsressurs\tRessurstype", new String[]{"Introduksjon til algebra\tArtikkel"});
+        Entity entity = parser.next();
+        assertEquals("Artikkel", entity.resourceTypes.get(0).name);
+    }
+
     private void init(String[] lines) {
-        String[] headerLines = new String[]{"\t\t\t\t\t\t\tFilter 1\t\tFilter 2\t\tFilter 3\t\tFilter 4\t\tFilter 5\t\tFilter 6\t\tFilter 7",
+        String[] header = new String[]{"\t\t\t\t\t\t\tFilter 1\t\tFilter 2\t\tFilter 3\t\tFilter 4\t\tFilter 5\t\tFilter 6\t\tFilter 7",
                 "Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tnn\tLenke til gammelt system\tRessurstype\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans"};
-        parser = new TsvParser(ArrayUtils.addAll(headerLines, lines), subject);
+
+        init(header, lines);
+    }
+
+    private void init(String header, String[] lines) {
+        init(new String[]{header}, lines);
+    }
+
+    private void init(String[] header, String[] lines) {
+        parser = new TsvParser(ArrayUtils.addAll(header, lines), subject);
     }
 
     private void init(String line) {
