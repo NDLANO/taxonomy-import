@@ -1,4 +1,4 @@
-package no.ndla.taxonomy.client;
+package no.ndla.taxonomy.client.subjectTopics;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

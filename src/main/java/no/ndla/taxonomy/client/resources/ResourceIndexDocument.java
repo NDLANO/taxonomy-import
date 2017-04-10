@@ -1,10 +1,8 @@
-package no.ndla.taxonomy.client;
+package no.ndla.taxonomy.client.resources;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.net.URI;
-import java.util.HashSet;
-import java.util.Set;
 
 public class ResourceIndexDocument {
     @JsonProperty
@@ -15,9 +13,6 @@ public class ResourceIndexDocument {
 
     @JsonProperty
     public String name;
-
-    @JsonProperty
-    public Set<ResourceTypeIndexDocument> resourceTypes = new HashSet<>();
 
     @JsonProperty
     public URI contentUri;

@@ -1,15 +1,15 @@
-package no.ndla.taxonomy.client;
+package no.ndla.taxonomy.client.resources;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.net.URI;
 
-public class CreateResourceCommand {
+public class ResourceTypeIndexDocument {
     @JsonProperty
     public URI id;
 
     @JsonProperty
-    public URI contentUri;
+    public URI parentId;
 
     @JsonProperty
     public String name;

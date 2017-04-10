@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class TestUtils {
+    public static final String baseUrl = "http://localhost:5000";
 
     public static <V> void assertAnyTrue(V[] objects, Predicate<V> predicate) {
         assertTrue("Array was empty", objects.length > 0);

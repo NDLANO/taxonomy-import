@@ -1,15 +1,15 @@
-package no.ndla.taxonomy.client;
+package no.ndla.taxonomy.client.topicSubtopics;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.net.URI;
 
-public class AddResourceToTopicCommand {
+public class AddSubtopicToTopicCommand {
     @JsonProperty
     public URI topicid;
 
     @JsonProperty
-    URI resourceid;
+    public URI subtopicid;
 
     @JsonProperty
     public boolean primary;

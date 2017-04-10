@@ -2,6 +2,18 @@ package no.ndla.taxonomy.client;
 
 import no.ndla.taxonomy.Importer;
 import no.ndla.taxonomy.Translation;
+import no.ndla.taxonomy.client.resourceResourceTypes.CreateResourceResourceTypeCommand;
+import no.ndla.taxonomy.client.resourceTypes.CreateResourceTypeCommand;
+import no.ndla.taxonomy.client.resources.CreateResourceCommand;
+import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
+import no.ndla.taxonomy.client.subjectTopics.AddTopicToSubjectCommand;
+import no.ndla.taxonomy.client.subjects.CreateSubjectCommand;
+import no.ndla.taxonomy.client.subjects.SubjectIndexDocument;
+import no.ndla.taxonomy.client.subjects.UpdateSubjectCommand;
+import no.ndla.taxonomy.client.topicResources.AddResourceToTopicCommand;
+import no.ndla.taxonomy.client.topicSubtopics.AddSubtopicToTopicCommand;
+import no.ndla.taxonomy.client.topics.CreateTopicCommand;
+import no.ndla.taxonomy.client.topics.TopicIndexDocument;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -70,11 +82,11 @@ public class TaxonomyRestClient {
         return restTemplate.postForLocation(urlBase + "/topics", cmd);
     }
 
-    public void addSubjectTopic(URI subjectId, URI topicId) {
+    public URI addSubjectTopic(URI subjectId, URI topicId) {
         AddTopicToSubjectCommand cmd = new AddTopicToSubjectCommand();
         cmd.subjectid = subjectId;
         cmd.topicid = topicId;
-        restTemplate.postForLocation(urlBase + "/subject-topics", cmd);
+        return restTemplate.postForLocation(urlBase + "/subject-topics", cmd);
     }
 
     public TopicIndexDocument getTopic(URI id) {
@@ -82,11 +94,11 @@ public class TaxonomyRestClient {
         return restTemplate.getForObject(url, TopicIndexDocument.class);
     }
 
-    public void addTopicSubtopic(URI topicId, URI subtopicId) {
+    public URI addTopicSubtopic(URI topicId, URI subtopicId) {
         AddSubtopicToTopicCommand cmd = new AddSubtopicToTopicCommand();
         cmd.topicid = topicId;
         cmd.subtopicid = subtopicId;
-        restTemplate.postForLocation(urlBase + "/topic-subtopics", cmd);
+        return restTemplate.postForLocation(urlBase + "/topic-subtopics", cmd);
     }
 
     public URI createResource(URI id, String name, URI contentUri) {
@@ -98,11 +110,35 @@ public class TaxonomyRestClient {
         return restTemplate.postForLocation(urlBase + "/resources", cmd);
     }
 
-    public void addTopicResource(URI topicId, URI resourceId) {
+    public URI addTopicResource(URI topicId, URI resourceId) {
         AddResourceToTopicCommand cmd = new AddResourceToTopicCommand();
         cmd.resourceid = resourceId;
         cmd.topicid = topicId;
 
-        restTemplate.postForLocation(urlBase + "/topic-resources", cmd);
+        return restTemplate.postForLocation(urlBase + "/topic-resources", cmd);
+    }
+
+    public ResourceIndexDocument getResource(URI id) {
+        String url = urlBase + "/resources/" + id;
+        return restTemplate.getForObject(url, ResourceIndexDocument.class);
+    }
+
+    public ResourceTypeIndexDocument[] getResourceTypes() {
+        String url = urlBase + "/v1/resource-types";
+        return restTemplate.getForObject(url, ResourceTypeIndexDocument[].class);
+    }
+
+    public URI createResourceType(URI id, String name) {
+        CreateResourceTypeCommand cmd = new CreateResourceTypeCommand();
+        cmd.id = id;
+        cmd.name = name;
+        return restTemplate.postForLocation(urlBase + "/v1/resource-types", cmd);
+    }
+
+    public URI addResourceResourceType(URI resourceId, URI resourceTypeId) {
+        CreateResourceResourceTypeCommand cmd = new CreateResourceResourceTypeCommand();
+        cmd.resourceId = resourceId;
+        cmd.resourceTypeId = resourceTypeId;
+        return restTemplate.postForLocation(urlBase + "/v1/resource-resourcetypes", cmd);
     }
 }
