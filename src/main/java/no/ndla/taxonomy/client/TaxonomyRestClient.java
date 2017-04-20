@@ -4,6 +4,7 @@ import no.ndla.taxonomy.Importer;
 import no.ndla.taxonomy.Translation;
 import no.ndla.taxonomy.client.resourceResourceTypes.CreateResourceResourceTypeCommand;
 import no.ndla.taxonomy.client.resourceTypes.CreateResourceTypeCommand;
+import no.ndla.taxonomy.client.resourceTypes.ResourceTypeIndexDocument;
 import no.ndla.taxonomy.client.resources.CreateResourceCommand;
 import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
 import no.ndla.taxonomy.client.subjectTopics.AddTopicToSubjectCommand;
@@ -17,11 +18,12 @@ import no.ndla.taxonomy.client.topics.TopicIndexDocument;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class TaxonomyRestClient {
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
     private String urlBase;
 
     public TaxonomyRestClient(String urlBase, RestTemplate restTemplate) {
@@ -31,14 +33,14 @@ public class TaxonomyRestClient {
 
     private static final Map<String, String> controllerNames = new HashMap<String, String>() {
         {
-            put(Importer.SUBJECT_TYPE, "/subjects");
-            put(Importer.TOPIC_TYPE, "/topics");
-            put(Importer.RESOURCE_TYPE, "/resources");
+            put(Importer.SUBJECT_TYPE, "/v1/subjects");
+            put(Importer.TOPIC_TYPE, "/v1/topics");
+            put(Importer.RESOURCE_TYPE, "/v1/resources");
         }
     };
 
     public SubjectIndexDocument getSubject(URI id) {
-        String url = urlBase + "/subjects/" + id;
+        String url = urlBase + "/v1/subjects/" + id;
         return restTemplate.getForObject(url, SubjectIndexDocument.class);
     }
 
@@ -61,7 +63,7 @@ public class TaxonomyRestClient {
         cmd.name = name;
         cmd.contentUri = contentUri;
 
-        URI location = restTemplate.postForLocation(urlBase + "/subjects", cmd);
+        URI location = restTemplate.postForLocation(urlBase + "/v1/subjects", cmd);
         URI subjectid = getId(location);
         System.out.println("created: " + subjectid);
         return location;
@@ -84,18 +86,18 @@ public class TaxonomyRestClient {
         cmd.name = name;
         cmd.id = id;
         cmd.contentUri = contentUri;
-        return restTemplate.postForLocation(urlBase + "/topics", cmd);
+        return restTemplate.postForLocation(urlBase + "/v1/topics", cmd);
     }
 
     public URI addSubjectTopic(URI subjectId, URI topicId) {
         AddTopicToSubjectCommand cmd = new AddTopicToSubjectCommand();
         cmd.subjectid = subjectId;
         cmd.topicid = topicId;
-        return restTemplate.postForLocation(urlBase + "/subject-topics", cmd);
+        return restTemplate.postForLocation(urlBase + "/v1/subject-topics", cmd);
     }
 
     public TopicIndexDocument getTopic(URI id) {
-        String url = urlBase + "/topics/" + id;
+        String url = urlBase + "/v1/topics/" + id;
         return restTemplate.getForObject(url, TopicIndexDocument.class);
     }
 
@@ -103,7 +105,7 @@ public class TaxonomyRestClient {
         AddSubtopicToTopicCommand cmd = new AddSubtopicToTopicCommand();
         cmd.topicid = topicId;
         cmd.subtopicid = subtopicId;
-        return restTemplate.postForLocation(urlBase + "/topic-subtopics", cmd);
+        return restTemplate.postForLocation(urlBase + "/v1/topic-subtopics", cmd);
     }
 
     public URI createResource(URI id, String name, URI contentUri) {
@@ -112,7 +114,7 @@ public class TaxonomyRestClient {
         cmd.name = name;
         cmd.contentUri = contentUri;
 
-        return restTemplate.postForLocation(urlBase + "/resources", cmd);
+        return restTemplate.postForLocation(urlBase + "/v1/resources", cmd);
     }
 
     public URI addTopicResource(URI topicId, URI resourceId) {
@@ -120,11 +122,11 @@ public class TaxonomyRestClient {
         cmd.resourceid = resourceId;
         cmd.topicid = topicId;
 
-        return restTemplate.postForLocation(urlBase + "/topic-resources", cmd);
+        return restTemplate.postForLocation(urlBase + "/v1/topic-resources", cmd);
     }
 
     public ResourceIndexDocument getResource(URI id) {
-        String url = urlBase + "/resources/" + id;
+        String url = urlBase + "/v1/resources/" + id;
         return restTemplate.getForObject(url, ResourceIndexDocument.class);
     }
 
@@ -147,9 +149,12 @@ public class TaxonomyRestClient {
         return restTemplate.postForLocation(urlBase + "/v1/resource-resourcetypes", cmd);
     }
 
-    public ResourceTypeIndexDocument[] getResourceTypesForResource(URI id) {
-        String url = urlBase + "/resources/" + id + "/resource-types";
-        return restTemplate.getForObject(url, ResourceTypeIndexDocument[].class);
+    public no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument[] getResourceTypesForResource(URI id) {
+        String url = urlBase + "/v1/resources/" + id + "/resource-types";
+        return restTemplate.getForObject(url, no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument[].class);
     }
 
+    public void removeResourceResourceType(URI connectionId) {
+        restTemplate.delete(urlBase + "/v1/resource-resourcetypes/{id}", Collections.singletonMap("id", connectionId.toString()));
+    }
 }

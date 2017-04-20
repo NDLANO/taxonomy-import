@@ -1,8 +1,8 @@
 package no.ndla.taxonomy;
 
-import no.ndla.taxonomy.client.ResourceTypeIndexDocument;
 import no.ndla.taxonomy.client.TaxonomyRestClient;
 import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
+import no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.substringAfterLast;
 
 public class Importer {
@@ -75,46 +76,47 @@ public class Importer {
     }
 
     private URI importResource(Entity entity) {
-        if (null != entity.id) {
-            try {
-                ResourceIndexDocument resource = restClient.getResource(entity.id);
-                System.out.println("Updating resource: " + entity.id);
-                URI location = updateResource(entity, resource);
-                //get rts for resource, check if replace should be done
-                //updateResourceResourceTypeConnections(entity);
-                return location;
-            } catch (Exception e) {
-                if (entity.nodeId != null && entity.id == null) {
-                    entity.id = URI.create("urn:resource:1:" + entity.nodeId);
-                }
-                System.out.println("Creating resource: " + entity.id + " with nodeId: " + entity.nodeId);
-                return createResource(entity);
-            }
-        } else {
-            if (entity.nodeId != null) {
+        if (null == entity.id) {
+            if (isNotEmpty(entity.nodeId)) {
                 entity.id = URI.create("urn:resource:1:" + entity.nodeId);
-                try {
-                    ResourceIndexDocument resource = restClient.getResource(entity.id);
-                    System.out.println("Updating resource: " + entity.id);
-                    return updateResource(entity, resource);
-                } catch (Exception e) {
-                    System.out.println("Creating resource: " + entity.id);
-                    return createResource(entity);
-                }
+            } else {
+                System.out.println("Unable to create ID for entity " + entity.name + ". Skipping.");
+                return null;
             }
-            System.out.println("Creating resource: " + entity.id);
+        }
+
+        try {
+            ResourceIndexDocument resource = restClient.getResource(entity.id);
+            System.out.println("Updating resource: " + entity.id);
+            URI location = updateResource(entity, resource);
+            //get rts for resource, check if replace should be done
+            updateResourceResourceTypeConnections(entity);
+            return location;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Creating resource: " + entity.id + " with nodeId: " + entity.nodeId);
             return createResource(entity);
         }
     }
 
     private void updateResourceResourceTypeConnections(Entity entity) {
         List<ResourceTypeIndexDocument> currentResourceTypes = Arrays.asList(restClient.getResourceTypesForResource(entity.id));
-        boolean update = false;
+
         for (Entity.ResourceType resourceType : entity.resourceTypes) {
-            if (!currentResourceTypes.contains(resourceType)) {
-                update = true;
+            if (currentResourceTypes.stream().noneMatch(rt -> rt.name.equalsIgnoreCase(resourceType.name))) {
+                addResourceTypeToResource(entity.id, resourceType);
             }
         }
+
+        for (ResourceTypeIndexDocument resourceType : currentResourceTypes) {
+            if (entity.resourceTypes.stream().noneMatch(rt -> rt.name.equalsIgnoreCase(resourceType.name))) {
+                removeResourceTypeFromResource(resourceType.connectionId);
+            }
+        }
+    }
+
+    private void removeResourceTypeFromResource(URI connectionId) {
+        restClient.removeResourceResourceType(connectionId);
     }
 
     private URI updateResource(Entity entity, ResourceIndexDocument resource) {
@@ -137,10 +139,13 @@ public class Importer {
 
     private void addResourceTypesToResource(URI resourceId, List<Entity.ResourceType> resourceTypes) {
         for (Entity.ResourceType resourceType : resourceTypes) {
-
-            URI resourceTypeId = getOrCreateResourceTypeId(resourceType);
-            restClient.addResourceResourceType(resourceId, resourceTypeId);
+            addResourceTypeToResource(resourceId, resourceType);
         }
+    }
+
+    private void addResourceTypeToResource(URI resourceId, Entity.ResourceType resourceType) {
+        URI resourceTypeId = getOrCreateResourceTypeId(resourceType);
+        restClient.addResourceResourceType(resourceId, resourceTypeId);
     }
 
     private URI getOrCreateResourceTypeId(Entity.ResourceType resourceType) {
@@ -157,12 +162,11 @@ public class Importer {
     private void updateResourceTypeCache() {
         if (!resourceTypeCache.isEmpty()) return;
 
-        ResourceTypeIndexDocument[] resourceTypes = restClient.getResourceTypes();
-        for (ResourceTypeIndexDocument resourceType : resourceTypes) {
+        no.ndla.taxonomy.client.resourceTypes.ResourceTypeIndexDocument[] resourceTypes = restClient.getResourceTypes();
+        for (no.ndla.taxonomy.client.resourceTypes.ResourceTypeIndexDocument resourceType : resourceTypes) {
             resourceTypeCache.put(resourceType.name, resourceType.id);
         }
     }
-
 
     private void importSubjectTopic(Entity entity) {
         try {

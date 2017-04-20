@@ -1,15 +1,15 @@
-package no.ndla.taxonomy.client;
+package no.ndla.taxonomy.client.topicSubtopics;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.net.URI;
 
-public class SubjectTopicIndexDocument {
-    @JsonProperty
-    public URI subjectid;
-
+public class TopicSubtopicIndexDocument {
     @JsonProperty
     public URI topicid;
+
+    @JsonProperty
+    public URI subtopicid;
 
     @JsonProperty
     public URI id;
@@ -17,7 +17,7 @@ public class SubjectTopicIndexDocument {
     @JsonProperty
     public boolean primary;
 
-    SubjectTopicIndexDocument() {
+    TopicSubtopicIndexDocument() {
     }
 
 }

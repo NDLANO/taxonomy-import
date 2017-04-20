@@ -1,7 +1,7 @@
 package no.ndla.taxonomy;
 
 import no.ndla.taxonomy.client.TaxonomyRestClient;
-import no.ndla.taxonomy.client.TopicSubtopicIndexDocument;
+import no.ndla.taxonomy.client.topicSubtopics.TopicSubtopicIndexDocument;
 import no.ndla.taxonomy.client.subjects.SubjectIndexDocument;
 import no.ndla.taxonomy.client.topics.TopicIndexDocument;
 import org.junit.Test;

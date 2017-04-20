@@ -3,7 +3,6 @@ package no.ndla.taxonomy;
 import no.ndla.taxonomy.client.TaxonomyRestClient;
 import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
 import no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.web.client.RestTemplate;
 
@@ -74,7 +73,7 @@ public class ImportResourceTest {
         Entity resourceEntity = new Entity() {{
             type = "Resource";
             name = "Tall og algebra fasit YF";
-            id = URI.create("urn:topic:4");
+            id = URI.create("urn:resource:5");
             parent = parentEntity;
         }};
 
@@ -89,6 +88,7 @@ public class ImportResourceTest {
         Entity resource = new Entity() {{
             type = "Resource";
             name = "Trigonometry explained";
+            id = URI.create("urn:resource:1");
             resourceTypes.add(new Entity.ResourceType("Fagstoff"));
         }};
 
@@ -99,11 +99,11 @@ public class ImportResourceTest {
     }
 
     @Test
-    @Ignore
     public void can_replace_resource_type() throws Exception {
         Entity resource = new Entity() {{
             type = "Resource";
             resourceTypes.add(new Entity.ResourceType("Fagstoff"));
+            id = URI.create("urn:resource:6");
         }};
 
         importer.doImport(resource);

@@ -1,10 +1,10 @@
-package no.ndla.taxonomy.client;
+package no.ndla.taxonomy.client.subjectTopics;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.net.URI;
 
-public class UpdateTopicSubtopicCommand {
+public class UpdateSubjectTopicCommand {
     @JsonProperty
     public URI id;
 

@@ -1,4 +1,4 @@
-package no.ndla.taxonomy.client.resources;
+package no.ndla.taxonomy.client.resourceTypes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -9,11 +9,5 @@ public class ResourceTypeIndexDocument {
     public URI id;
 
     @JsonProperty
-    public URI parentId;
-
-    @JsonProperty
     public String name;
-
-    @JsonProperty
-    public URI connectionId;
 }
