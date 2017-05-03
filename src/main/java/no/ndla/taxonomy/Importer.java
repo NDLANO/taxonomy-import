@@ -41,9 +41,7 @@ public class Importer {
         for (Map.Entry<String, Translation> entry : entity.translations.entrySet()) {
             restClient.addTranslation(location, entry.getKey(), entry.getValue());
         }
-
     }
-
 
     private URI getId(URI location) {
         String id = substringAfterLast(location.toString(), "/");
@@ -93,7 +91,6 @@ public class Importer {
             updateResourceResourceTypeConnections(entity);
             return location;
         } catch (Exception e) {
-            e.printStackTrace();
             System.out.println("Creating resource: " + entity.id + " with nodeId: " + entity.nodeId);
             return createResource(entity);
         }
