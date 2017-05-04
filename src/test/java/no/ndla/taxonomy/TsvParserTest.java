@@ -1,6 +1,7 @@
 package no.ndla.taxonomy;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -15,10 +16,16 @@ public class TsvParserTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
-    Entity subject = new Entity() {{
-        name = "Matematikk";
-        id = URI.create("urn:subject:1");
-    }};
+
+    Entity subject;
+
+    @Before
+    public void setUp() throws Exception {
+        subject = new Entity() {{
+            name = "Matematikk";
+            id = URI.create("urn:subject:1");
+        }};
+    }
 
     @Test
     public void first_lines_contains_specification() throws Exception {
@@ -200,9 +207,17 @@ public class TsvParserTest {
         assertEquals("Artikkel", entity.resourceTypes.get(0).name);
     }
 
+    @Test
+    public void can_read_filters() throws Exception {
+        init("Læringsressurs\tFilter\tRelevans\tFilter\tRelevans", new String[]{"Introduksjon til calculus\tVG1\tTilvalgsstoff\tVG2\tKjernestoff"});
+        Entity entity = parser.next();
+        assertEquals("Introduksjon til calculus", entity.name);
+        assertEquals(2, entity.filters.size());
+    }
+
     private void init(String[] lines) {
         String[] header = new String[]{"\t\t\t\t\t\t\tFilter 1\t\tFilter 2\t\tFilter 3\t\tFilter 4\t\tFilter 5\t\tFilter 6\t\tFilter 7",
-                "Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tnn\tLenke til gammelt system\tRessurstype\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans"};
+                "Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tnn\tLenke til gammelt system\tRessurstype\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans"};
 
         init(header, lines);
     }

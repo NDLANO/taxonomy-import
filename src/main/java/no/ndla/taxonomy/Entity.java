@@ -16,17 +16,10 @@ public class Entity {
     public final List<ResourceType> resourceTypes = new ArrayList<>();
 
     public Entity parent;
+    public List<Filter> filters = new ArrayList<>();
 
     public void setId(String id) {
         this.id = URI.create(id);
     }
 
-    public static class ResourceType {
-        public URI id;
-        public String name;
-
-        public ResourceType(String name) {
-            this.name = name;
-        }
-    }
 }

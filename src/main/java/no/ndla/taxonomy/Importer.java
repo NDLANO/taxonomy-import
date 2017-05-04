@@ -1,6 +1,7 @@
 package no.ndla.taxonomy;
 
 import no.ndla.taxonomy.client.TaxonomyRestClient;
+import no.ndla.taxonomy.client.resources.FilterIndexDocument;
 import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
 import no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument;
 
@@ -19,6 +20,7 @@ public class Importer {
     public static final String RESOURCE_TYPE = "Resource";
 
     private static final Map<String, URI> resourceTypeCache = new HashMap<>();
+    private static final Map<String, URI> filterCache = new HashMap<>();
 
     private TaxonomyRestClient restClient;
 
@@ -89,17 +91,82 @@ public class Importer {
             URI location = updateResource(entity, resource);
             //get rts for resource, check if replace should be done
             updateResourceResourceTypeConnections(entity);
+            updateFilters(entity);
             return location;
         } catch (Exception e) {
             System.out.println("Creating resource: " + entity.id + " with nodeId: " + entity.nodeId);
-            return createResource(entity);
+            URI resourceURI = createResource(entity);
+            updateFilters(entity);
+            return resourceURI;
+        }
+    }
+
+    private void updateFilters(Entity entity) {
+        Entity subject = getSubject(entity);
+
+        List<FilterIndexDocument> currentFilters = Arrays.asList(restClient.getFiltersForResource(entity.id));
+
+        for (Filter filter : entity.filters) {
+            if (currentFilters.stream().noneMatch(f -> f.name.equalsIgnoreCase(filter.name))) {
+                addFilterToResource(entity.id, filter, subject.id);
+            }
+        }
+
+        for (FilterIndexDocument filter : currentFilters) {
+            if (entity.filters.stream().noneMatch(rt -> rt.name.equalsIgnoreCase(filter.name))) {
+                removeFilterFromResource(filter.connectionId);
+            }
+        }
+    }
+
+    private void removeFilterFromResource(URI connectionId) {
+        restClient.removeResourceFilter(connectionId);
+    }
+
+    private void addFiltersToResource(URI resourceId, List<Filter> filters, URI subjectId) {
+        for (Filter filter : filters) {
+            addFilterToResource(resourceId, filter, subjectId);
+        }
+    }
+
+    private void addFilterToResource(URI resourceId, Filter filter, URI subjectId) {
+        URI filterId = getOrCreateFilterId(filter, subjectId);
+        restClient.addResourceFilter(resourceId, filterId);
+    }
+
+    private URI getOrCreateFilterId(Filter filter, URI subjectId) {
+        updateFilterCache(subjectId);
+        if (!filterCache.containsKey(filter.name)) {
+            URI location = restClient.createFilter(filter.id, filter.name, subjectId);
+            URI id = getId(location);
+            filter.id = id;
+            filterCache.put(filter.name, id);
+        }
+        return filterCache.get(filter.name);
+    }
+
+    private void updateFilterCache(URI subjectId) {
+        if (!filterCache.isEmpty()) return;
+
+        no.ndla.taxonomy.client.subjects.FilterIndexDocument[] filters = restClient.getFiltersForSubject(subjectId);
+        for (no.ndla.taxonomy.client.subjects.FilterIndexDocument filter : filters) {
+            filterCache.put(filter.name, filter.id);
+        }
+    }
+
+
+    private Entity getSubject(Entity entity) {
+        while (true) {
+            if (SUBJECT_TYPE.equals(entity.type)) return entity;
+            if (entity.parent == null) return null;
+            entity = entity.parent;
         }
     }
 
     private void updateResourceResourceTypeConnections(Entity entity) {
         List<ResourceTypeIndexDocument> currentResourceTypes = Arrays.asList(restClient.getResourceTypesForResource(entity.id));
 
-        for (Entity.ResourceType resourceType : entity.resourceTypes) {
+        for (ResourceType resourceType : entity.resourceTypes) {
             if (currentResourceTypes.stream().noneMatch(rt -> rt.name.equalsIgnoreCase(resourceType.name))) {
                 addResourceTypeToResource(entity.id, resourceType);
             }
@@ -134,18 +201,18 @@ public class Importer {
         return location;
     }
 
-    private void addResourceTypesToResource(URI resourceId, List<Entity.ResourceType> resourceTypes) {
-        for (Entity.ResourceType resourceType : resourceTypes) {
+    private void addResourceTypesToResource(URI resourceId, List<ResourceType> resourceTypes) {
+        for (ResourceType resourceType : resourceTypes) {
             addResourceTypeToResource(resourceId, resourceType);
         }
     }
 
-    private void addResourceTypeToResource(URI resourceId, Entity.ResourceType resourceType) {
+    private void addResourceTypeToResource(URI resourceId, ResourceType resourceType) {
         URI resourceTypeId = getOrCreateResourceTypeId(resourceType);
         restClient.addResourceResourceType(resourceId, resourceTypeId);
     }
 
-    private URI getOrCreateResourceTypeId(Entity.ResourceType resourceType) {
+    private URI getOrCreateResourceTypeId(ResourceType resourceType) {
         updateResourceTypeCache();
         if (!resourceTypeCache.containsKey(resourceType.name)) {
             URI location = restClient.createResourceType(resourceType.id, resourceType.name);

@@ -85,7 +85,7 @@ public class ImportResourceTest extends ImporterTest {
             type = "Resource";
             name = "Trigonometry explained";
             id = URI.create("urn:resource:1");
-            resourceTypes.add(new Entity.ResourceType("Fagstoff"));
+            resourceTypes.add(new ResourceType("Fagstoff"));
         }};
 
         importer.doImport(resource);
@@ -98,13 +98,13 @@ public class ImportResourceTest extends ImporterTest {
     public void can_replace_resource_type() throws Exception {
         Entity resource = new Entity() {{
             type = "Resource";
-            resourceTypes.add(new Entity.ResourceType("Fagstoff"));
+            resourceTypes.add(new ResourceType("Fagstoff"));
             id = URI.create("urn:resource:6");
         }};
 
         importer.doImport(resource);
         resource.resourceTypes.clear();
-        resource.resourceTypes.add(new Entity.ResourceType("Vedlegg"));
+        resource.resourceTypes.add(new ResourceType("Vedlegg"));
         importer.doImport(resource);
 
         ResourceTypeIndexDocument[] result = restTemplate.getForObject(baseUrl + "/v1/resources/" + resource.id + "/resource-types", ResourceTypeIndexDocument[].class);
