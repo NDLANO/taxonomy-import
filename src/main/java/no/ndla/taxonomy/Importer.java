@@ -1,6 +1,7 @@
 package no.ndla.taxonomy;
 
 import no.ndla.taxonomy.client.TaxonomyRestClient;
+import no.ndla.taxonomy.client.relevances.RelevanceIndexDocument;
 import no.ndla.taxonomy.client.resources.FilterIndexDocument;
 import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
 import no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument;
@@ -21,6 +22,7 @@ public class Importer {
 
     private static final Map<String, URI> resourceTypeCache = new HashMap<>();
     private static final Map<String, URI> filterCache = new HashMap<>();
+    private static final Map<String, URI> relevanceCache = new HashMap<>();
 
     private TaxonomyRestClient restClient;
 
@@ -131,7 +133,34 @@ public class Importer {
 
     private void addFilterToResource(URI resourceId, Filter filter, URI subjectId) {
         URI filterId = getOrCreateFilterId(filter, subjectId);
-        restClient.addResourceFilter(resourceId, filterId);
+        URI relevanceId = getOrCreateRelevanceId(filter.relevance);
+        restClient.addResourceFilter(resourceId, filterId, relevanceId);
+    }
+
+    private URI getOrCreateRelevanceId(Relevance relevance) {
+        updateRelevanceCache();
+        if (!relevanceCache.containsKey(relevance.name)) {
+            if (relevance.name.equals("Kjernestoff")) {
+                relevance.id = URI.create("urn:relevance:core");
+            } else if (relevance.name.equals("Tilvalgsstoff")) {
+                relevance.id = URI.create("urn:relevance:supplementary");
+            }
+
+            URI location = restClient.createRelevance(relevance.id, relevance.name);
+            URI id = getId(location);
+            relevance.id = id;
+            relevanceCache.put(relevance.name, id);
+        }
+        return relevanceCache.get(relevance.name);
+    }
+
+    private void updateRelevanceCache() {
+        if (!relevanceCache.isEmpty()) return;
+
+        RelevanceIndexDocument[] relevances = restClient.getRelevances();
+        for (RelevanceIndexDocument relevance : relevances) {
+            relevanceCache.put(relevance.name, relevance.id);
+        }
     }
 
     private URI getOrCreateFilterId(Filter filter, URI subjectId) {

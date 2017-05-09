@@ -3,6 +3,8 @@ package no.ndla.taxonomy.client;
 import no.ndla.taxonomy.Importer;
 import no.ndla.taxonomy.Translation;
 import no.ndla.taxonomy.client.filters.CreateFilterCommand;
+import no.ndla.taxonomy.client.relevances.CreateRelevanceCommand;
+import no.ndla.taxonomy.client.relevances.RelevanceIndexDocument;
 import no.ndla.taxonomy.client.resourceFilters.AddFilterToResourceCommand;
 import no.ndla.taxonomy.client.resourceResourceTypes.CreateResourceResourceTypeCommand;
 import no.ndla.taxonomy.client.resourceTypes.CreateResourceTypeCommand;
@@ -175,10 +177,11 @@ public class TaxonomyRestClient {
         restTemplate.delete(urlBase + "/v1/resource-filter/{id}", Collections.singletonMap("id", connectionId.toString()));
     }
 
-    public URI addResourceFilter(URI resourceId, URI filterId) {
+    public URI addResourceFilter(URI resourceId, URI filterId, URI relevanceId) {
         AddFilterToResourceCommand cmd = new AddFilterToResourceCommand();
         cmd.resourceId = resourceId;
         cmd.filterId = filterId;
+        cmd.relevanceId = relevanceId;
 
         return restTemplate.postForLocation(urlBase + "/v1/resource-filters", cmd);
     }
@@ -190,5 +193,17 @@ public class TaxonomyRestClient {
         cmd.subjectId = subjectId;
 
         return restTemplate.postForLocation(urlBase + "/v1/filters", cmd);
+    }
+
+    public RelevanceIndexDocument[] getRelevances() {
+        String url = urlBase + "/v1/relevances";
+        return restTemplate.getForObject(url, RelevanceIndexDocument[].class);
+    }
+
+    public URI createRelevance(URI id, String name) {
+        CreateRelevanceCommand cmd = new CreateRelevanceCommand();
+        cmd.id = id;
+        cmd.name = name;
+        return restTemplate.postForLocation(urlBase + "/v1/relevances", cmd);
     }
 }

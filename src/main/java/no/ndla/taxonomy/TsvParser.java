@@ -170,6 +170,7 @@ public class TsvParser implements Iterator<Entity> {
         }
 
         private void put(String columnName, int i) {
+            columnName = columnName.trim();
             List<Integer> indices = entries.computeIfAbsent(columnName, k -> new ArrayList<>());
             indices.add(i);
         }
