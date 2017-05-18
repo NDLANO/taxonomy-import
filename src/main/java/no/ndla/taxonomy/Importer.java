@@ -31,6 +31,8 @@ public class Importer {
     }
 
     void doImport(Entity entity) {
+        if (entity == null) return;
+
         URI location = importEntity(entity);
         entity.id = getId(location);
 
@@ -80,7 +82,11 @@ public class Importer {
     private URI importResource(Entity entity) {
         if (null == entity.id) {
             if (isNotEmpty(entity.nodeId)) {
-                entity.id = URI.create("urn:resource:1:" + entity.nodeId);
+                try {
+                    entity.id = URI.create("urn:resource:1:" + entity.nodeId);
+                } catch (Exception e) {
+                    System.out.println("Error creating ID for entity " + entity.name + " with nodeid: '" +entity.nodeId + "': " + e.getMessage() + " Skipping.");
+                }
             } else {
                 System.out.println("Unable to create ID for entity " + entity.name + ". Skipping.");
                 return null;

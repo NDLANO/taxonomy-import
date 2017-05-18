@@ -96,7 +96,7 @@ public class ImportSubjectTest extends ImporterTest {
         }};
 
         importer.doImport(topicEntity);
-        TopicIndexDocument[] topics = restTemplate.getForObject(baseUrl + "/subjects/urn:subject:1/topics", TopicIndexDocument[].class);
+        TopicIndexDocument[] topics = restTemplate.getForObject(baseUrl + "/v1/subjects/urn:subject:1/topics", TopicIndexDocument[].class);
         assertAnyTrue(topics, t -> t.parent.equals(parentEntity.id));
     }
 }

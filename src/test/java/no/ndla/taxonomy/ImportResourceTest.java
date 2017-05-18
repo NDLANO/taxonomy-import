@@ -27,6 +27,11 @@ public class ImportResourceTest extends ImporterTest {
     }
 
     @Test
+    public void ignores_null() throws Exception {
+        importer.doImport(null);
+    }
+
+    @Test
     public void can_add_existing_resource_without_changes() throws Exception {
         Entity entity = new Entity() {{
             type = "Resource";

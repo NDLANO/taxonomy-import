@@ -89,7 +89,7 @@ public class ImportTopicTest extends ImporterTest {
 
         importer.doImport(topicEntity);
 
-        TopicSubtopicIndexDocument[] topicSubtopics = restTemplate.getForObject(baseUrl + "/topic-subtopics", TopicSubtopicIndexDocument[].class);
+        TopicSubtopicIndexDocument[] topicSubtopics = restTemplate.getForObject(baseUrl + "/v1/topic-subtopics", TopicSubtopicIndexDocument[].class);
         assertAnyTrue(topicSubtopics, t -> t.topicid.equals(parentEntity.id) && t.subtopicid.equals(topicEntity.id));
     }
 

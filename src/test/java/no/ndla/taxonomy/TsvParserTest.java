@@ -9,6 +9,8 @@ import org.junit.rules.ExpectedException;
 import java.net.URI;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class TsvParserTest {
 
@@ -205,6 +207,30 @@ public class TsvParserTest {
         init("Læringsressurs\tRessurstype", new String[]{"Introduksjon til algebra\tArtikkel"});
         Entity entity = parser.next();
         assertEquals("Artikkel", entity.resourceTypes.get(0).name);
+    }
+
+    @Test
+    public void blank_lines_return_null() throws Exception {
+        init("Læringsressurs", new String[]{"Resource 1", "Resource 2", "\t\t\t", "Resource 3"});
+        Entity entity1 = parser.next();
+        Entity entity2 = parser.next();
+        Entity entity3 = parser.next();
+        Entity entity4 = parser.next();
+        assertEquals("Resource 1", entity1.name);
+        assertEquals("Resource 2", entity2.name);
+        assertNull(entity3);
+        assertEquals("Resource 3", entity4.name);
+    }
+
+    @Test
+    public void lines_not_scheduled_for_import_return_null() throws Exception {
+        init("Import\tLæringsressurs", new String[]{"x\tResource 1", "\tResource 2", "x\tResource 3"});
+        Entity entity1 = parser.next();
+        Entity entity2 = parser.next();
+        Entity entity3 = parser.next();
+        assertNotNull(entity1);
+        assertNull(entity2);
+        assertNotNull(entity3);
     }
 
     @Test

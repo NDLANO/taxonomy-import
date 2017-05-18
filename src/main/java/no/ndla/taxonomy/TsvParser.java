@@ -31,7 +31,14 @@ public class TsvParser implements Iterator<Entity> {
     @Override
     public Entity next() {
         String line = lines.next();
+        if (isBlank(line)) return null;
+
         columns = line.split("\t");
+
+        if (hasField("Import")) {
+            String doImport = getField("Import");
+            if (isBlank(doImport)) return null;
+        }
 
         result = new Entity();
 
@@ -62,8 +69,12 @@ public class TsvParser implements Iterator<Entity> {
         }
     }
 
+    private boolean hasField(String columnName) {
+        return columnMap.containsKey(columnName);
+    }
+
     private String getField(String columnName) {
-        if (!columnMap.containsKey(columnName)) return null;
+        if (!hasField(columnName)) return null;
         int columnIndex = columnMap.get(columnName);
         return getField(columnIndex);
     }
