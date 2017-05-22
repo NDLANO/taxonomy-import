@@ -10,4 +10,7 @@ public class UpdateSubjectTopicCommand {
 
     @JsonProperty
     public boolean primary;
+
+    @JsonProperty
+    public int rank;
 }

@@ -16,6 +16,10 @@ public class TsvParser implements Iterator<Entity> {
 
     private Entity result;
     private String[] columns;
+    private int currentResourceRank;
+    private int currentTopicLevelOneRank;
+    private int currentTopicLevelTwoRank;
+    private int currentTopicLevelThreeRank;
 
     public TsvParser(String[] lines, Entity subject) {
         this(new ArrayStringIterator(lines), subject);
@@ -42,7 +46,7 @@ public class TsvParser implements Iterator<Entity> {
 
         result = new Entity();
 
-        setEntityName();
+        setEntityLevelInformation();
         setTranslatedName();
         setNodeId();
         setParent();
@@ -107,7 +111,7 @@ public class TsvParser implements Iterator<Entity> {
         }
     }
 
-    private void setEntityName() {
+    private void setEntityLevelInformation() {
         String topicLevel1 = getField("Emne nivå 1");
         String topicLevel2 = getField("Emne nivå 2");
         String topicLevel3 = getField("Emne nivå 3");
@@ -119,18 +123,28 @@ public class TsvParser implements Iterator<Entity> {
             currentLevelOneTopic = result;
             currentLevelTwoTopic = null;
             currentLevelThreeTopic = null;
+            result.rank = ++currentTopicLevelOneRank;
+            currentTopicLevelTwoRank = 0;
+            currentTopicLevelThreeRank = 0;
+            currentResourceRank = 0;
         } else if (isNotBlank(topicLevel2)) {
             result.type = "Topic";
             result.name = topicLevel2;
             currentLevelTwoTopic = result;
             currentLevelThreeTopic = null;
+            result.rank = ++currentTopicLevelTwoRank;
+            currentTopicLevelThreeRank = 0;
+            currentResourceRank = 0;
         } else if (isNotBlank(topicLevel3)) {
             result.type = "Topic";
             result.name = topicLevel3;
             currentLevelThreeTopic = result;
+            result.rank = ++currentTopicLevelThreeRank;
+            currentResourceRank = 0;
         } else if (isNotBlank(resourceName)) {
             result.type = "Resource";
             result.name = resourceName;
+            result.rank = ++currentResourceRank;
         } else {
             throw new MissingParameterException("Entity must be named", lines.getLineNumber());
         }

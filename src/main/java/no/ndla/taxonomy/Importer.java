@@ -5,6 +5,11 @@ import no.ndla.taxonomy.client.relevances.RelevanceIndexDocument;
 import no.ndla.taxonomy.client.resources.FilterIndexDocument;
 import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
 import no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument;
+import no.ndla.taxonomy.client.subjectTopics.SubjectTopicIndexDocument;
+import no.ndla.taxonomy.client.subjectTopics.UpdateSubjectTopicCommand;
+import no.ndla.taxonomy.client.subjects.TopicIndexDocument;
+import no.ndla.taxonomy.client.topicResources.TopicResourceIndexDocument;
+import no.ndla.taxonomy.client.topicSubtopics.TopicSubtopicIndexDocument;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -20,6 +25,8 @@ public class Importer {
     public static final String TOPIC_TYPE = "Topic";
     public static final String RESOURCE_TYPE = "Resource";
 
+    private Entity currentSubject;
+
     private static final Map<String, URI> resourceTypeCache = new HashMap<>();
     private static final Map<String, URI> filterCache = new HashMap<>();
     private static final Map<String, URI> relevanceCache = new HashMap<>();
@@ -32,6 +39,10 @@ public class Importer {
 
     void doImport(Entity entity) {
         if (entity == null) return;
+
+        if (entity.type.equals(SUBJECT_TYPE)) {
+            currentSubject = entity;
+        }
 
         URI location = importEntity(entity);
         entity.id = getId(location);
@@ -56,13 +67,38 @@ public class Importer {
 
     private void importTopicResource(Entity entity) {
         try {
-            restClient.addTopicResource(entity.parent.id, entity.id);
+            no.ndla.taxonomy.client.topics.ResourceIndexDocument[] resourcesForTopic = restClient.getResourcesForTopic(entity.parent.id);
+            for (no.ndla.taxonomy.client.topics.ResourceIndexDocument resource : resourcesForTopic) {
+                if (resource.id.equals(entity.id)) {
+                    TopicResourceIndexDocument topicResource = restClient.getTopicResource(resource.connectionId);
+                    System.out.println("Updating topic resource for resource: " + entity.id);
+                    topicResource.rank = entity.rank;
+                    topicResource.topicid = entity.parent.id;
+                    restClient.updateTopicResource(topicResource);
+                    return;
+                }
+            }
+            System.out.println("Adding topic resource for: " + entity.id);
+            restClient.addTopicResource(entity.parent.id, entity.id, entity.rank);
         } catch (Exception e) {
         }
     }
 
     private void importTopicSubtopic(Entity entity) {
         try {
+            if (currentSubject != null) {
+                TopicIndexDocument[] topicsForSubject = restClient.getTopicsForSubject(currentSubject.id);
+                for (TopicIndexDocument topic : topicsForSubject) {
+                    if (topic.id.equals(entity.id)) {
+                        TopicSubtopicIndexDocument topicSubtopic = restClient.getTopicSubtopic(topic.connectionId);
+                        System.out.println("Updating topic subtopic connection for topic: " + entity.id);
+                        topicSubtopic.rank = entity.rank;
+                        restClient.updateTopicSubtopic(topicSubtopic);
+                        return;
+                    }
+                }
+            }
+            System.out.println("Adding topic subtopics connection for topic: " + entity.id);
             restClient.addTopicSubtopic(entity.parent.id, entity.id);
         } catch (Exception e) {
         }
@@ -269,7 +305,18 @@ public class Importer {
 
     private void importSubjectTopic(Entity entity) {
         try {
-            restClient.addSubjectTopic(entity.parent.id, entity.id);
+            TopicIndexDocument[] topicsForSubject = restClient.getTopicsForSubject(entity.parent.id);
+            for (TopicIndexDocument topic : topicsForSubject) {
+                if (topic.id.equals(entity.id)) {
+                    SubjectTopicIndexDocument subjectTopic = restClient.getSubjectTopic(topic.connectionId);
+                    subjectTopic.rank = entity.rank;
+                    System.out.println("Updating subject topic for topic: " + entity.id);
+                    restClient.updateSubjectTopic(subjectTopic);
+                    return;
+                }
+            }
+            System.out.println("Adding topic " + entity.id + " to subject " + entity.parent.id);
+            restClient.addSubjectTopic(entity.parent.id, entity.id, entity.rank);
         } catch (Exception e) {
         }
     }

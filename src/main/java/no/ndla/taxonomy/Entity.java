@@ -10,6 +10,7 @@ public class Entity {
 
     public String type, name, nodeId;
     public URI id, contentUri;
+    public int rank;
 
     public final Map<String, Translation> translations = new HashMap<>();
 

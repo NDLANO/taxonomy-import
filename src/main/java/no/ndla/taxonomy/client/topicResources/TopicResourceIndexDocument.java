@@ -1,15 +1,17 @@
-package no.ndla.taxonomy.client.subjectTopics;
+package no.ndla.taxonomy.client.topicResources;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.net.URI;
 
-public class SubjectTopicIndexDocument {
-    @JsonProperty
-    public URI subjectid;
+public class TopicResourceIndexDocument {
+
 
     @JsonProperty
     public URI topicid;
+
+    @JsonProperty
+    URI resourceid;
 
     @JsonProperty
     public URI id;
@@ -20,7 +22,6 @@ public class SubjectTopicIndexDocument {
     @JsonProperty
     public int rank;
 
-    SubjectTopicIndexDocument() {
+    TopicResourceIndexDocument() {
     }
-
 }

@@ -131,4 +131,39 @@ public class ImportResourceTest extends ImporterTest {
         ResourceIndexDocument topic = restTemplate.getForObject(baseUrl + "/v1/resources/urn:resource:1:12345", ResourceIndexDocument.class);
         assertEquals(entity.name, topic.name);
     }
+
+    @Test
+    public void can_add_rank_for_topic_resources() throws Exception {
+        Entity parentEntity = new Entity() {{
+            type = "Topic";
+            name = "Tall og algebra";
+            id = URI.create("urn:topic:2");
+            rank = 2;
+        }};
+        importer.doImport(parentEntity);
+
+        Entity entity = new Entity() {{
+            type = "Resource";
+            name = "Sinus og cosinus";
+            nodeId = "12345";
+            parent = parentEntity;
+            rank = 2;
+        }};
+
+        importer.doImport(entity);
+        Entity resourceEntity = new Entity() {{
+            type = "Resource";
+            name = "Tall og algebra fasit YF";
+            id = URI.create("urn:resource:5");
+            parent = parentEntity;
+            rank = 1;
+        }};
+
+        importer.doImport(resourceEntity);
+
+        ResourceIndexDocument[] resources = restTemplate.getForObject(baseUrl + "/v1/topics/urn:topic:2/resources", ResourceIndexDocument[].class);
+        assertEquals(resourceEntity.name, resources[0].name);
+        assertEquals(entity.name, resources[1].name);
+
+    }
 }

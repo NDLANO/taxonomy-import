@@ -99,4 +99,36 @@ public class ImportSubjectTest extends ImporterTest {
         TopicIndexDocument[] topics = restTemplate.getForObject(baseUrl + "/v1/subjects/urn:subject:1/topics", TopicIndexDocument[].class);
         assertAnyTrue(topics, t -> t.parent.equals(parentEntity.id));
     }
+
+    @Test
+    public void topics_for_subject_can_have_rank() throws Exception {
+        Entity parentEntity = new Entity() {{
+            type = "Subject";
+            name = "Matematikk";
+            id = URI.create("urn:subject:1");
+        }};
+        importer.doImport(parentEntity);
+
+        Entity topicEntity = new Entity() {{
+            type = "Topic";
+            name = "Geometri";
+            id = URI.create("urn:topic:2");
+            parent = parentEntity;
+            rank = 1;
+        }};
+        importer.doImport(topicEntity);
+
+        Entity topic2 = new Entity() {{
+           type = "Topic";
+           name = "Statistikk";
+           id = URI.create("urn:topic:3");
+           parent = parentEntity;
+           rank = 2;
+        }};
+        importer.doImport(topic2);
+
+        TopicIndexDocument[] topics = restTemplate.getForObject(baseUrl + "/v1/subjects/urn:subject:1/topics", TopicIndexDocument[].class);
+        assertEquals(topicEntity.id, topics[0].id);
+        assertEquals(topic2.id, topics[1].id);
+    }
 }

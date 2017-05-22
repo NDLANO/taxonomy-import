@@ -12,12 +12,18 @@ import no.ndla.taxonomy.client.resourceTypes.ResourceTypeIndexDocument;
 import no.ndla.taxonomy.client.resources.CreateResourceCommand;
 import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
 import no.ndla.taxonomy.client.subjectTopics.AddTopicToSubjectCommand;
+import no.ndla.taxonomy.client.subjectTopics.SubjectTopicIndexDocument;
+import no.ndla.taxonomy.client.subjectTopics.UpdateSubjectTopicCommand;
 import no.ndla.taxonomy.client.subjects.CreateSubjectCommand;
 import no.ndla.taxonomy.client.subjects.FilterIndexDocument;
 import no.ndla.taxonomy.client.subjects.SubjectIndexDocument;
 import no.ndla.taxonomy.client.subjects.UpdateSubjectCommand;
 import no.ndla.taxonomy.client.topicResources.AddResourceToTopicCommand;
+import no.ndla.taxonomy.client.topicResources.TopicResourceIndexDocument;
+import no.ndla.taxonomy.client.topicResources.UpdateTopicResourceCommand;
 import no.ndla.taxonomy.client.topicSubtopics.AddSubtopicToTopicCommand;
+import no.ndla.taxonomy.client.topicSubtopics.TopicSubtopicIndexDocument;
+import no.ndla.taxonomy.client.topicSubtopics.UpdateTopicSubtopicCommand;
 import no.ndla.taxonomy.client.topics.CreateTopicCommand;
 import no.ndla.taxonomy.client.topics.TopicIndexDocument;
 import org.springframework.web.client.RestTemplate;
@@ -94,10 +100,11 @@ public class TaxonomyRestClient {
         return restTemplate.postForLocation(urlBase + "/v1/topics", cmd);
     }
 
-    public URI addSubjectTopic(URI subjectId, URI topicId) {
+    public URI addSubjectTopic(URI subjectId, URI topicId, int rank) {
         AddTopicToSubjectCommand cmd = new AddTopicToSubjectCommand();
         cmd.subjectid = subjectId;
         cmd.topicid = topicId;
+        cmd.rank = rank;
         return restTemplate.postForLocation(urlBase + "/v1/subject-topics", cmd);
     }
 
@@ -122,10 +129,11 @@ public class TaxonomyRestClient {
         return restTemplate.postForLocation(urlBase + "/v1/resources", cmd);
     }
 
-    public URI addTopicResource(URI topicId, URI resourceId) {
+    public URI addTopicResource(URI topicId, URI resourceId, int rank) {
         AddResourceToTopicCommand cmd = new AddResourceToTopicCommand();
         cmd.resourceid = resourceId;
         cmd.topicid = topicId;
+        cmd.rank = rank;
 
         return restTemplate.postForLocation(urlBase + "/v1/topic-resources", cmd);
     }
@@ -205,5 +213,60 @@ public class TaxonomyRestClient {
         cmd.id = id;
         cmd.name = name;
         return restTemplate.postForLocation(urlBase + "/v1/relevances", cmd);
+    }
+
+    public TopicResourceIndexDocument getTopicResource(URI id) {
+        String url = urlBase + "/v1/topic-resources/" + id;
+        return restTemplate.getForObject(url, TopicResourceIndexDocument.class);
+    }
+
+    public void updateTopicResource(TopicResourceIndexDocument topicResource) {
+        UpdateTopicResourceCommand command = new UpdateTopicResourceCommand();
+        command.id = topicResource.id;
+        command.primary = topicResource.primary;
+        command.rank = topicResource.rank;
+
+        String url = urlBase + "/v1/topic-resources/" + topicResource.id;
+        restTemplate.put(url, command);
+    }
+
+    public no.ndla.taxonomy.client.topics.ResourceIndexDocument[] getResourcesForTopic(URI topicId) {
+        String url = urlBase + "/v1/topics/" + topicId + "/resources";
+        return restTemplate.getForObject(url, no.ndla.taxonomy.client.topics.ResourceIndexDocument[].class);
+    }
+
+    public no.ndla.taxonomy.client.subjects.TopicIndexDocument[] getTopicsForSubject(URI id) {
+        String url = urlBase + "/v1/subjects/" + id + "/topics?recursive=true";
+        return restTemplate.getForObject(url, no.ndla.taxonomy.client.subjects.TopicIndexDocument[].class);
+    }
+
+    public TopicSubtopicIndexDocument getTopicSubtopic(URI connectionId) {
+        String url = urlBase + "/v1/topic-subtopics/" + connectionId;
+        return restTemplate.getForObject(url, TopicSubtopicIndexDocument.class);
+    }
+
+    public void updateTopicSubtopic(TopicSubtopicIndexDocument topicSubtopic) {
+        UpdateTopicSubtopicCommand command = new UpdateTopicSubtopicCommand();
+        command.id = topicSubtopic.id;
+        command.primary = topicSubtopic.primary;
+        command.rank = topicSubtopic.rank;
+
+        String url = urlBase + "/v1/topic-subtopics/" + command.id;
+        restTemplate.put(url, command);
+    }
+
+    public SubjectTopicIndexDocument getSubjectTopic(URI id) {
+        String url = urlBase + "/v1/subject-topics/" + id;
+        return restTemplate.getForObject(url, SubjectTopicIndexDocument.class);
+    }
+
+    public void updateSubjectTopic(SubjectTopicIndexDocument subjectTopic) {
+        UpdateSubjectTopicCommand command = new UpdateSubjectTopicCommand();
+        command.id = subjectTopic.id;
+        command.primary = subjectTopic.primary;
+        command.rank = subjectTopic.rank;
+
+        String url = urlBase + "/v1/subject-topics/" + subjectTopic.id;
+        restTemplate.put(url, command);
     }
 }

@@ -106,4 +106,47 @@ public class ImportTopicTest extends ImporterTest {
         TopicIndexDocument topic = restTemplate.getForObject(baseUrl + "/v1/topics/urn:topic:1:12345", TopicIndexDocument.class);
         assertEquals(entity.name, topic.name);
     }
+
+    @Test
+    public void can_add_rank_for_topic() throws Exception {
+        Entity subject = new Entity() {{
+           type = "Subject";
+           name = "Mathematics";
+           id = URI.create("urn:subject:1");
+        }};
+
+        importer.doImport(subject);
+
+        Entity parentEntity = new Entity() {{
+            type = "Topic";
+            name = "Geometri";
+            id = URI.create("urn:topic:2");
+            parent = subject;
+        }};
+        importer.doImport(parentEntity);
+
+        Entity topicEntity = new Entity() {{
+            type = "Topic";
+            name = "Trigonometri";
+            id = URI.create("urn:topic:3");
+            parent = parentEntity;
+            rank = 1;
+        }};
+        importer.doImport(topicEntity);
+
+        Entity subtopic = new Entity() {{
+            type = "Topic";
+            name = "Shapes";
+            id = URI.create("urn:topic:4");
+            parent = parentEntity;
+            rank = 2;
+        }};
+
+        importer.doImport(subtopic);
+
+        TopicSubtopicIndexDocument[] topicSubtopics = restTemplate.getForObject(baseUrl + "/v1/subjects/urn:subject:1/topics?recursive=true", TopicSubtopicIndexDocument[].class);
+        assertEquals(parentEntity.id, topicSubtopics[0].id);
+        assertEquals(topicEntity.id, topicSubtopics[1].id);
+        assertEquals(subtopic.id, topicSubtopics[2].id);
+    }
 }

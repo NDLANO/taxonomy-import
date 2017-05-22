@@ -13,4 +13,7 @@ public class AddTopicToSubjectCommand {
 
     @JsonProperty
     public boolean primary;
+
+    @JsonProperty
+    public int rank;
 }

@@ -241,6 +241,92 @@ public class TsvParserTest {
         assertEquals(2, entity.filters.size());
     }
 
+    @Test
+    public void resources_have_rank() throws Exception {
+        String[] lines = {"\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
+                "\t\t\tTall og algebra løsningsforslag YF\tTal og algebra løysingsforslag YF\thttp://red.ndla.no/nb/node/138015?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
+                "\t\t\tTall og algebra oppgavesamling YF\tTal og algebra oppgåvesamling YF\thttp://red.ndla.no/nb/node/138014?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n"};
+        init(lines);
+        Entity entity1 = parser.next();
+        Entity entity2 = parser.next();
+        Entity entity3 = parser.next();
+
+        assertEquals(1, entity1.rank);
+        assertEquals(2, entity2.rank);
+        assertEquals(3, entity3.rank);
+    }
+
+    @Test
+    public void topics_have_rank() throws Exception {
+        String[] lines = {"Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n",
+                "\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
+                "\t\t\tTall og algebra løsningsforslag YF\tTal og algebra løysingsforslag YF\thttp://red.ndla.no/nb/node/138015?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
+                "\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n"};
+                init(lines);
+        Entity entity1 = parser.next();
+        Entity entity2 = parser.next();
+        Entity entity3 = parser.next();
+        assertEquals(1, entity1.rank);
+        assertEquals(1, entity2.rank);
+        assertEquals(2, entity3.rank);
+    }
+
+    @Test
+    public void resources_under_new_topic_restarts_rank_count() throws Exception {
+        String[] lines = {
+                "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n",
+                "\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
+                "\t\t\tTall og algebra løsningsforslag YF\tTal og algebra løysingsforslag YF\thttp://red.ndla.no/nb/node/138015?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
+                "\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n",
+                "\t\t\tTall og tallmengder\t\thttp://red.ndla.no/nb/node/175926?fag=54\tLæringssti\t1T-ST\tKjernestoff\t1T-YF\tKjernestoff\t\t\t\t\t\t\t\t\t\t\n"};
+        init(lines);
+        Entity entity1 = parser.next();
+        Entity entity2 = parser.next();
+        Entity entity3 = parser.next();
+        Entity entity4 = parser.next();
+        Entity entity5 = parser.next();
+
+        assertEquals(1, entity1.rank);
+        assertEquals(1, entity2.rank);
+        assertEquals(2, entity3.rank);
+        assertEquals(1, entity4.rank);
+        assertEquals(1, entity5.rank);
+    }
+
+    @Test
+    public void topics_have_correct_rank() throws Exception {
+        String[] lines = {
+                "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\tPotenser\t\t\t\thttp://red.ndla.no/nb/node/165234?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "Geometri\t\t\t\tGeometri\thttp://red.ndla.no/nb/node/12345?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\tTrigonometri\t\t\t\thttp://red.ndla.no/nb/node/15209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\tFormer\t\t\t\thttp://red.ndla.no/nb/node/16534?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\t\tFirkanter\t\t\thttp://red.ndla.no/nb/node/16545?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
+                "\t\tSirkler\t\t\thttp://red.ndla.no/nb/node/16546?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t"
+        };
+        init(lines);
+
+        Entity entity1 = parser.next();
+        Entity entity2 = parser.next();
+        Entity entity3 = parser.next();
+        Entity entity4 = parser.next();
+        Entity entity5 = parser.next();
+        Entity entity6 = parser.next();
+        Entity entity7 = parser.next();
+        Entity entity8 = parser.next();
+
+        assertEquals(1, entity1.rank);
+        assertEquals(1, entity2.rank);
+        assertEquals(2, entity3.rank);
+        assertEquals(2, entity4.rank);
+        assertEquals(1, entity5.rank);
+        assertEquals(2, entity6.rank);
+        assertEquals(1, entity7.rank);
+        assertEquals(2, entity8.rank);
+
+    }
+
     private void init(String[] lines) {
         String[] header = new String[]{"\t\t\t\t\t\t\tFilter 1\t\tFilter 2\t\tFilter 3\t\tFilter 4\t\tFilter 5\t\tFilter 6\t\tFilter 7",
                 "Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tnn\tLenke til gammelt system\tRessurstype\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans"};

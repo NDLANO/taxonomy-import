@@ -17,6 +17,9 @@ public class TopicSubtopicIndexDocument {
     @JsonProperty
     public boolean primary;
 
+    @JsonProperty
+    public int rank;
+
     TopicSubtopicIndexDocument() {
     }
 
