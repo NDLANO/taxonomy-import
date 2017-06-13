@@ -2,6 +2,7 @@ package no.ndla.taxonomy;
 
 import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
 import no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument;
+import no.ndla.taxonomy.client.resources.UpdateResourceCommand;
 import org.junit.Test;
 
 import java.net.URI;
@@ -164,6 +165,28 @@ public class ImportResourceTest extends ImporterTest {
         ResourceIndexDocument[] resources = restTemplate.getForObject(baseUrl + "/v1/topics/urn:topic:2/resources", ResourceIndexDocument[].class);
         assertEquals(resourceEntity.name, resources[0].name);
         assertEquals(entity.name, resources[1].name);
+    }
 
+    @Test
+    public void existing_contentURI_is_not_changed_upon_import() throws Exception {
+        Entity entity = new Entity() {{
+            type = "Resource";
+            name = "Sinus og cosinus";
+            nodeId = "12345";
+        }};
+
+        importer.doImport(entity);
+
+        UpdateResourceCommand command = new UpdateResourceCommand() {{
+            name = "Sinus og cosinus";
+            contentUri = URI.create("urn:article:1");
+        }};
+
+        restTemplate.put(baseUrl + "/v1/resources/urn:resource:1:12345", command);
+
+        importer.doImport(entity);
+
+        ResourceIndexDocument topic = restTemplate.getForObject(baseUrl + "/v1/resources/urn:resource:1:12345", ResourceIndexDocument.class);
+        assertEquals(command.contentUri, topic.contentUri);
     }
 }
