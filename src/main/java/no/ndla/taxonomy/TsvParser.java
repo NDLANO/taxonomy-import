@@ -7,6 +7,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TsvParser implements Iterator<Entity> {
 
+    public static final String RESSURSTYPE = "Ressurstype";
+    public static final String LÆRINGSRESSURS = "Læringsressurs";
+    public static final String EMNE = "Emne";
     private StringIterator lines;
     private ColumnMap columnMap;
     private Entity currentSubject;
@@ -115,10 +118,10 @@ public class TsvParser implements Iterator<Entity> {
         String topicLevel1 = getField("Emne nivå 1");
         String topicLevel2 = getField("Emne nivå 2");
         String topicLevel3 = getField("Emne nivå 3");
-        String resourceName = getField("Læringsressurs");
+        String resourceName = getField(LÆRINGSRESSURS);
 
         if (isNotBlank(topicLevel1)) {
-            result.type = "Topic";
+            result.type = Importer.TOPIC_TYPE;
             result.name = topicLevel1;
             currentLevelOneTopic = result;
             currentLevelTwoTopic = null;
@@ -128,7 +131,7 @@ public class TsvParser implements Iterator<Entity> {
             currentTopicLevelThreeRank = 0;
             currentResourceRank = 0;
         } else if (isNotBlank(topicLevel2)) {
-            result.type = "Topic";
+            result.type = Importer.TOPIC_TYPE;
             result.name = topicLevel2;
             currentLevelTwoTopic = result;
             currentLevelThreeTopic = null;
@@ -136,13 +139,13 @@ public class TsvParser implements Iterator<Entity> {
             currentTopicLevelThreeRank = 0;
             currentResourceRank = 0;
         } else if (isNotBlank(topicLevel3)) {
-            result.type = "Topic";
+            result.type = Importer.TOPIC_TYPE;
             result.name = topicLevel3;
             currentLevelThreeTopic = result;
             result.rank = ++currentTopicLevelThreeRank;
             currentResourceRank = 0;
         } else if (isNotBlank(resourceName)) {
-            result.type = "Resource";
+            result.type = Importer.RESOURCE_TYPE;
             result.name = resourceName;
             result.rank = ++currentResourceRank;
         } else {
@@ -171,7 +174,7 @@ public class TsvParser implements Iterator<Entity> {
 
 
     private void setResourceType() {
-        String resourceType = getField("Ressurstype");
+        String resourceType = getField(RESSURSTYPE);
         if (isBlank(resourceType)) return;
 
         result.resourceTypes.add(new ResourceType(resourceType));
@@ -186,7 +189,7 @@ public class TsvParser implements Iterator<Entity> {
 
         ColumnMap() {
             String line = "";
-            while (!(line.contains("Emne") || line.contains("Læringsressurs"))) line = lines.next();
+            while (!(line.contains(EMNE) || line.contains(LÆRINGSRESSURS))) line = lines.next();
 
             String[] specification = line.split("\t");
             for (int i = 0; i < specification.length; i++) {

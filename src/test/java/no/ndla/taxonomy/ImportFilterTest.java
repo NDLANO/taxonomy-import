@@ -37,14 +37,14 @@ public class ImportFilterTest extends ImporterTest {
             filters.add(new Filter() {{
                 name = "VG1";
                 relevance = new Relevance() {{
-                    name = "Tilvalgsstoff";
+                    name = Importer.TILLEGGSSSTOFF;
                 }};
             }});
 
             filters.add(new Filter() {{
                 name = "VG2";
                 relevance = new Relevance() {{
-                    name = "Kjernestoff";
+                    name = Importer.KJERNESTOFF;
                 }};
             }});
         }};
@@ -63,7 +63,7 @@ public class ImportFilterTest extends ImporterTest {
         RelevanceIndexDocument[] relevances = restTemplate.getForObject(baseUrl + "/v1/relevances", RelevanceIndexDocument[].class);
         assertEquals(2, relevances.length);
         assertAnyTrue(relevances, r -> "urn:relevance:core".equals(r.id.toString()) && "Kjernestoff".equals(r.name));
-        assertAnyTrue(relevances, r -> "urn:relevance:supplementary".equals(r.id.toString()) && "Tilvalgsstoff".equals(r.name));
+        assertAnyTrue(relevances, r -> "urn:relevance:supplementary".equals(r.id.toString()) && "Tilleggsstoff".equals(r.name));
 
         //filters should be added to subject
         no.ndla.taxonomy.client.subjects.FilterIndexDocument[] subjectFilters = restTemplate.getForObject(baseUrl + "/v1/subjects/" + subject.id + "/filters", no.ndla.taxonomy.client.subjects.FilterIndexDocument[].class);

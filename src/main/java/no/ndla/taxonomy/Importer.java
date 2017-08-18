@@ -24,6 +24,8 @@ public class Importer {
     public static final String SUBJECT_TYPE = "Subject";
     public static final String TOPIC_TYPE = "Topic";
     public static final String RESOURCE_TYPE = "Resource";
+    public static final String KJERNESTOFF = "Kjernestoff";
+    public static final String TILLEGGSSSTOFF = "Tilleggsstoff";
 
     private Entity currentSubject;
 
@@ -182,9 +184,9 @@ public class Importer {
     private URI getOrCreateRelevanceId(Relevance relevance) {
         updateRelevanceCache();
         if (!relevanceCache.containsKey(relevance.name)) {
-            if (relevance.name.equals("Kjernestoff")) {
+            if (relevance.name.equals(KJERNESTOFF)) {
                 relevance.id = URI.create("urn:relevance:core");
-            } else if (relevance.name.equals("Tilvalgsstoff")) {
+            } else if (relevance.name.equals(TILLEGGSSSTOFF)) {
                 relevance.id = URI.create("urn:relevance:supplementary");
             }
 
