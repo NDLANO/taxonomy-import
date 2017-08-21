@@ -92,6 +92,7 @@ public class ImporterApplication {
     }
 
     private static class InputStreamStringIterator extends TsvParser.StringIterator {
+        public static final int HEADER_LINES_IN_SPREADSHEET = 2;
         private final BufferedReader reader;
 
         private int lineNumber = -1;
@@ -121,7 +122,7 @@ public class ImporterApplication {
 
         @Override
         public int getLineNumber() {
-            return lineNumber + 1; //Add 1 to correspond to spreadsheet numbering
+            return lineNumber + HEADER_LINES_IN_SPREADSHEET;
         }
     }
 }
