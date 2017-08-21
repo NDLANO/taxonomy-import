@@ -8,8 +8,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class TsvParser implements Iterator<Entity> {
 
     public static final String RESSURSTYPE = "Ressurstype";
+    public static final String SUBRESSURSTYPE = "Subressurstype";
     public static final String LÆRINGSRESSURS = "Læringsressurs";
     public static final String EMNE = "Emne";
+    private Map<String, String> resourceTypeParents;
+
     private StringIterator lines;
     private ColumnMap columnMap;
     private Entity currentSubject;
@@ -32,6 +35,40 @@ public class TsvParser implements Iterator<Entity> {
         this.lines = lines;
         this.currentSubject = subject;
         this.columnMap = new ColumnMap();
+        buildResourceTypeParents();
+    }
+
+    private void buildResourceTypeParents() {
+        resourceTypeParents = new HashMap<>();
+        String fagstoff = "Fagstoff";
+        resourceTypeParents.put("Film og filmklipp", fagstoff);
+        resourceTypeParents.put("Forelesning og presentasjon",fagstoff);
+        resourceTypeParents.put("Fagartikkel", fagstoff);
+        resourceTypeParents.put("Tegning og illustrasjon", fagstoff);
+        resourceTypeParents.put("Simulering", fagstoff);
+        resourceTypeParents.put("Verktøy og mal", fagstoff);
+        resourceTypeParents.put("Veiledning", fagstoff);
+        resourceTypeParents.put("Lydopptak", fagstoff);
+        resourceTypeParents.put("Oppslagsverk og ordliste", fagstoff);
+        String oppgaverOgAktiviteter = "Oppgaver og aktiviteter";
+        resourceTypeParents.put("Oppgave", oppgaverOgAktiviteter);
+        resourceTypeParents.put("Øvelse", oppgaverOgAktiviteter);
+        resourceTypeParents.put("Arbeidsoppdrag", oppgaverOgAktiviteter);
+        resourceTypeParents.put("Forsøk", oppgaverOgAktiviteter);
+        resourceTypeParents.put("Spill", oppgaverOgAktiviteter);
+        String vurderingsressurs = "Vurderingsressurs";
+        resourceTypeParents.put("Lærervurdering", vurderingsressurs);
+        resourceTypeParents.put("Egenvurdering", vurderingsressurs);
+        resourceTypeParents.put("Medelevvurdering", vurderingsressurs);
+        String eksternRessurs = "Ekstern læringsressurs";
+        resourceTypeParents.put("Ekstern lenke", eksternRessurs);
+        resourceTypeParents.put("Delt læringsressurs", eksternRessurs);
+        resourceTypeParents.put("FYR-ressurs", eksternRessurs);
+        String kildemateriale = "Kildemateriale";
+        resourceTypeParents.put("Historisk materiale", kildemateriale);
+        resourceTypeParents.put("Malerier- grafikk -kunstfoto", kildemateriale);
+        resourceTypeParents.put("Litterære tekster", kildemateriale);
+        resourceTypeParents.put("Musikk", kildemateriale);
     }
 
 
@@ -174,10 +211,15 @@ public class TsvParser implements Iterator<Entity> {
 
 
     private void setResourceType() {
+        String subresourceType = getField(SUBRESSURSTYPE);
         String resourceType = getField(RESSURSTYPE);
-        if (isBlank(resourceType)) return;
-
-        result.resourceTypes.add(new ResourceType(resourceType));
+        if (isBlank(resourceType) && isBlank(subresourceType)) return;
+        if (isNotBlank(subresourceType)) {
+            result.resourceTypes.add(new ResourceType(resourceTypeParents.get(subresourceType)));
+            result.resourceTypes.add(new ResourceType(subresourceType, resourceTypeParents.get(subresourceType)));
+        } else {
+            result.resourceTypes.add(new ResourceType(resourceType));
+        }
     }
 
     public static abstract class StringIterator implements Iterator<String> {

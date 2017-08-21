@@ -148,10 +148,13 @@ public class TaxonomyRestClient {
         return restTemplate.getForObject(url, ResourceTypeIndexDocument[].class);
     }
 
-    public URI createResourceType(URI id, String name) {
+    public URI createResourceType(URI id, String name, URI parentId) {
         CreateResourceTypeCommand cmd = new CreateResourceTypeCommand();
         cmd.id = id;
         cmd.name = name;
+        if (parentId != null) {
+            cmd.parentId = parentId;
+        }
         return restTemplate.postForLocation(urlBase + "/v1/resource-types", cmd);
     }
 

@@ -8,9 +8,7 @@ import org.junit.rules.ExpectedException;
 
 import java.net.URI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class TsvParserTest {
 
@@ -204,9 +202,42 @@ public class TsvParserTest {
 
     @Test
     public void can_read_resource_type() throws Exception {
-        init("Læringsressurs\tRessurstype", new String[]{"Introduksjon til algebra\tArtikkel"});
+        init("Læringsressurs\tRessurstype", new String[]{"Introduksjon til algebra\tFagstoff"});
         Entity entity = parser.next();
-        assertEquals("Artikkel", entity.resourceTypes.get(0).name);
+        assertEquals("Fagstoff", entity.resourceTypes.get(0).name);
+    }
+
+    @Test
+    public void learning_path_is_top_level_resource_type() throws Exception {
+        init("Læringsressurs\tRessurstype\tSubressurstype", new String[]{"Introduksjon til algebra\tLæringssti\t"});
+        Entity entity = parser.next();
+        assertEquals("Læringssti", entity.resourceTypes.get(0).name);
+        assertEquals(1, entity.resourceTypes.size());
+    }
+
+    @Test
+    public void sub_resource_type_gets_correct_parent_by_inference() throws Exception {
+        init("Læringsressurs\tRessurstype\tSubressurstype", new String[]{"Introduksjon til algebra\tOppgaver og aktiviteter\tArbeidsoppdrag"});
+        Entity entity = parser.next();
+        assertEquals("Oppgaver og aktiviteter", entity.resourceTypes.get(1).parentName);
+    }
+
+    @Test
+    public void parent_resource_type_is_listed_first() throws Exception {
+        init("Læringsressurs\tRessurstype\tSubressurstype", new String[]{"Introduksjon til algebra\t\tArbeidsoppdrag"});
+        Entity entity = parser.next();
+        assertEquals("Oppgaver og aktiviteter", entity.resourceTypes.get(0).name);
+        assertEquals("Arbeidsoppdrag", entity.resourceTypes.get(1).name);
+        assertEquals(2, entity.resourceTypes.size());
+    }
+
+    @Test
+    public void sub_resource_type_overrides_resource_type() throws Exception {
+        init("Læringsressurs\tRessurstype\tSubressurstype", new String[]{"Introduksjon til algebra\tFagstoff\tArbeidsoppdrag"});
+        Entity entity = parser.next();
+        assertEquals("Oppgaver og aktiviteter", entity.resourceTypes.get(0).name);
+        assertEquals("Arbeidsoppdrag", entity.resourceTypes.get(1).name);
+        assertEquals(2, entity.resourceTypes.size());
     }
 
     @Test

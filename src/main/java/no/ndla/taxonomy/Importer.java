@@ -6,7 +6,6 @@ import no.ndla.taxonomy.client.resources.FilterIndexDocument;
 import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
 import no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument;
 import no.ndla.taxonomy.client.subjectTopics.SubjectTopicIndexDocument;
-import no.ndla.taxonomy.client.subjectTopics.UpdateSubjectTopicCommand;
 import no.ndla.taxonomy.client.subjects.TopicIndexDocument;
 import no.ndla.taxonomy.client.topicResources.TopicResourceIndexDocument;
 import no.ndla.taxonomy.client.topicSubtopics.TopicSubtopicIndexDocument;
@@ -17,8 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.apache.commons.lang3.StringUtils.substringAfterLast;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class Importer {
     public static final String SUBJECT_TYPE = "Subject";
@@ -123,7 +121,7 @@ public class Importer {
                 try {
                     entity.id = URI.create("urn:resource:1:" + entity.nodeId);
                 } catch (Exception e) {
-                    System.out.println("Error creating ID for entity " + entity.name + " with nodeid: '" +entity.nodeId + "': " + e.getMessage() + " Skipping.");
+                    System.out.println("Error creating ID for entity " + entity.name + " with nodeid: '" + entity.nodeId + "': " + e.getMessage() + " Skipping.");
                 }
             } else {
                 System.out.println("Unable to create ID for entity " + entity.name + ". Skipping.");
@@ -288,7 +286,10 @@ public class Importer {
     private URI getOrCreateResourceTypeId(ResourceType resourceType) {
         updateResourceTypeCache();
         if (!resourceTypeCache.containsKey(resourceType.name)) {
-            URI location = restClient.createResourceType(resourceType.id, resourceType.name);
+            if (isNotBlank(resourceType.parentName)) {
+                resourceType.parentId = resourceTypeCache.get(resourceType.parentName);
+            }
+            URI location = restClient.createResourceType(resourceType.id, resourceType.name, resourceType.parentId);
             URI id = getId(location);
             resourceType.id = id;
             resourceTypeCache.put(resourceType.name, id);

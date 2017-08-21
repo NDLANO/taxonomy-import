@@ -118,6 +118,32 @@ public class ImportResourceTest extends ImporterTest {
         assertEquals("Vedlegg", result[0].name);
     }
 
+    @Test
+    public void can_add_resource_and_sub_resource_type() throws Exception {
+        Entity resource = new Entity() {{
+            type = "Resource";
+            name = "Kildekritikk";
+            ResourceType parent = new ResourceType("Fagstoff");
+            resourceTypes.add(parent);
+            ResourceType child = new ResourceType("Fagartikkel");
+            child.parentName = "Fagstoff";
+            child.parentId = parent.id;
+            resourceTypes.add(child);
+            id = URI.create("urn:resource:11");
+        }};
+
+        importer.doImport(resource);
+
+        ResourceTypeIndexDocument[] result = restTemplate.getForObject(baseUrl + "/v1/resources/" + resource.id + "/resource-types", ResourceTypeIndexDocument[].class);
+        assertEquals(2, result.length);
+        ResourceTypeIndexDocument first = result[0];
+        ResourceTypeIndexDocument second = result[1];
+        if (first.name.equals("Fagartikkel")) {
+            assertEquals(first.parentId, second.id);
+        } else {
+            assertEquals(second.parentId, first.id);
+        }
+    }
 
     @Test
     public void nodeId_becomes_versioned_id_for_resource() throws Exception {
