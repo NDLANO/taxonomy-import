@@ -1,5 +1,6 @@
 package no.ndla.taxonomy;
 
+import java.net.URI;
 import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -7,11 +8,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TsvParser implements Iterator<Entity> {
 
-    public static final String RESSURSTYPE = "Ressurstype";
-    public static final String SUBRESSURSTYPE = "Subressurstype";
+    public static final String RESOURCE_TYPE = "Ressurstype";
+    public static final String SUB_RESOURCE_TYPE = "Subressurstype";
     public static final String LÆRINGSRESSURS = "Læringsressurs";
     public static final String EMNE = "Emne";
-    private Map<String, String> resourceTypeParents;
+    private Map<String, ResourceType> resourceTypes;
 
     private StringIterator lines;
     private ColumnMap columnMap;
@@ -39,36 +40,56 @@ public class TsvParser implements Iterator<Entity> {
     }
 
     private void buildResourceTypeParents() {
-        resourceTypeParents = new HashMap<>();
+        resourceTypes = new HashMap<>();
         String fagstoff = "Fagstoff";
-        resourceTypeParents.put("Film og filmklipp", fagstoff);
-        resourceTypeParents.put("Forelesning og presentasjon",fagstoff);
-        resourceTypeParents.put("Fagartikkel", fagstoff);
-        resourceTypeParents.put("Tegning og illustrasjon", fagstoff);
-        resourceTypeParents.put("Simulering", fagstoff);
-        resourceTypeParents.put("Verktøy og mal", fagstoff);
-        resourceTypeParents.put("Veiledning", fagstoff);
-        resourceTypeParents.put("Lydopptak", fagstoff);
-        resourceTypeParents.put("Oppslagsverk og ordliste", fagstoff);
         String oppgaverOgAktiviteter = "Oppgaver og aktiviteter";
-        resourceTypeParents.put("Oppgave", oppgaverOgAktiviteter);
-        resourceTypeParents.put("Øvelse", oppgaverOgAktiviteter);
-        resourceTypeParents.put("Arbeidsoppdrag", oppgaverOgAktiviteter);
-        resourceTypeParents.put("Forsøk", oppgaverOgAktiviteter);
-        resourceTypeParents.put("Spill", oppgaverOgAktiviteter);
         String vurderingsressurs = "Vurderingsressurs";
-        resourceTypeParents.put("Lærervurdering", vurderingsressurs);
-        resourceTypeParents.put("Egenvurdering", vurderingsressurs);
-        resourceTypeParents.put("Medelevvurdering", vurderingsressurs);
         String eksternRessurs = "Ekstern læringsressurs";
-        resourceTypeParents.put("Ekstern lenke", eksternRessurs);
-        resourceTypeParents.put("Delt læringsressurs", eksternRessurs);
-        resourceTypeParents.put("FYR-ressurs", eksternRessurs);
         String kildemateriale = "Kildemateriale";
-        resourceTypeParents.put("Historisk materiale", kildemateriale);
-        resourceTypeParents.put("Malerier- grafikk -kunstfoto", kildemateriale);
-        resourceTypeParents.put("Litterære tekster", kildemateriale);
-        resourceTypeParents.put("Musikk", kildemateriale);
+        String emne = "Emne";
+
+        resourceTypes.put("Læringssti", new ResourceType("Læringssti", null, URI.create("urn:resourcetype:learningPath")));
+
+        resourceTypes.put(fagstoff, new ResourceType(fagstoff, null, URI.create("urn:resourcetype:subjectMaterial")));
+        resourceTypes.put(oppgaverOgAktiviteter, new ResourceType(oppgaverOgAktiviteter, null, URI.create("urn:resourcetype:tasksAndActivities")));
+        resourceTypes.put(vurderingsressurs, new ResourceType(vurderingsressurs, null, URI.create("urn:resourcetype:reviewResource")));
+        resourceTypes.put(eksternRessurs, new ResourceType(eksternRessurs, null, URI.create("urn:resourcetype:externalResource")));
+        resourceTypes.put(kildemateriale, new ResourceType(kildemateriale, null, URI.create("urn:resourcetype:SourceMaterial")));
+        resourceTypes.put(emne, new ResourceType(emne, null, URI.create("urn:resourcetype:topic")));
+
+        resourceTypes.put("Film og filmklipp", new ResourceType("Film og filmklipp", fagstoff, URI.create("urn:resourcetype:movieAndClip")));
+        resourceTypes.put("Forelesning og presentasjon", new ResourceType("Forelesning og presentasjon", fagstoff, URI.create("urn:resourcetype:lectureAndPresentation")));
+        resourceTypes.put("Fagartikkel", new ResourceType("Fagartikkel", fagstoff, URI.create("urn:resourcetype:academicArticle")));
+        resourceTypes.put("Tegning og illustrasjon", new ResourceType("Tegning og illustrasjon", fagstoff, URI.create("urn:resourcetype:drawingAndIllustration")));
+        resourceTypes.put("Simulering", new ResourceType("Simulering", fagstoff, URI.create("urn:resourcetype:simulation")));
+        resourceTypes.put("Verktøy og mal", new ResourceType("Verktøy og mal", fagstoff, URI.create("urn:resourcetype:toolAndTemplate")));
+        resourceTypes.put("Veiledning", new ResourceType("Veiledning", fagstoff, URI.create("urn:resourcetype:guidance")));
+        resourceTypes.put("Lydopptak", new ResourceType("Lydopptak", fagstoff, URI.create("urn:resourcetype:soundRecording")));
+        resourceTypes.put("Oppslagsverk og ordliste", new ResourceType("Oppslagsverk og ordliste", fagstoff, URI.create("urn:resourcetype:dictionary")));
+
+        resourceTypes.put("Oppgave", new ResourceType("Oppgave", oppgaverOgAktiviteter, URI.create("urn:resourcetype:task")));
+        resourceTypes.put("Øvelse", new ResourceType("Øvelse", oppgaverOgAktiviteter, URI.create("urn:resourcetype:exercise")));
+        resourceTypes.put("Arbeidsoppdrag", new ResourceType("Arbeidsoppdrag", oppgaverOgAktiviteter, URI.create("urn:resourcetype:workAssignment")));
+        resourceTypes.put("Forsøk", new ResourceType("Forsøk", oppgaverOgAktiviteter, URI.create("urn:resourcetype:experiment")));
+        resourceTypes.put("Spill", new ResourceType("Spill", oppgaverOgAktiviteter, URI.create("urn:resourcetype:game")));
+        resourceTypes.put("Oppgaver og aktiviteter", new ResourceType("Oppgaver og aktiviteter", oppgaverOgAktiviteter, URI.create("urn:resourcetype:tasksAndActivities")));
+
+        resourceTypes.put("Lærervurdering", new ResourceType("Lærervurdering", vurderingsressurs, URI.create("urn:resourcetype:teacherEvaluation")));
+        resourceTypes.put("Egenvurdering", new ResourceType("Egenvurdering", vurderingsressurs, URI.create("urn:resourcetype:selfEvaluation")));
+        resourceTypes.put("Medelevvurdering", new ResourceType("Medelevvurdering", vurderingsressurs, URI.create("urn:resourcetype:peerEvaulation")));
+        resourceTypes.put("Ekstern lenke", new ResourceType("Ekstern lenke", vurderingsressurs, URI.create("urn:resourcetype:externalLink")));
+
+        resourceTypes.put("Ekstern lenke", new ResourceType("Ekstern lenke", eksternRessurs, URI.create("urn:resourcetype:externalLink")));
+        resourceTypes.put("Delt læringsressurs", new ResourceType("Delt læringsressurs", eksternRessurs, URI.create("urn:resourcetype:sharedLearningResource")));
+        resourceTypes.put("FYR-ressurs", new ResourceType("FYR-ressurs", eksternRessurs, URI.create("urn:resourcetype:FYRResource")));
+
+        resourceTypes.put("Historisk materiale", new ResourceType("Historisk materiale", kildemateriale, URI.create("urn:resourcetype:historicalMaterial")));
+        resourceTypes.put("Malerier- grafikk -kunstfoto", new ResourceType("Malerier- grafikk -kunstfoto", kildemateriale, URI.create("urn:resourcetype:paintingGraphicsPhoto")));
+        resourceTypes.put("Litterære tekster", new ResourceType("Litterære tekster", kildemateriale, URI.create("urn:resourcetype:literaryText")));
+        resourceTypes.put("Musikk", new ResourceType("Musikk", kildemateriale, URI.create("urn:resourcetype:music")));
+
+        resourceTypes.put("Emnebeskrivelse", new ResourceType("Emnebeskrivelse", emne, URI.create("urn:resourcetype:topicDescription")));
+
     }
 
 
@@ -211,14 +232,16 @@ public class TsvParser implements Iterator<Entity> {
 
 
     private void setResourceType() {
-        String subresourceType = getField(SUBRESSURSTYPE);
-        String resourceType = getField(RESSURSTYPE);
+        String subresourceType = getField(SUB_RESOURCE_TYPE);
+        String resourceType = getField(RESOURCE_TYPE);
         if (isBlank(resourceType) && isBlank(subresourceType)) return;
+
+
         if (isNotBlank(subresourceType)) {
-            result.resourceTypes.add(new ResourceType(resourceTypeParents.get(subresourceType)));
-            result.resourceTypes.add(new ResourceType(subresourceType, resourceTypeParents.get(subresourceType)));
+            result.resourceTypes.add(resourceTypes.get(resourceTypes.get(subresourceType).parentName));
+            result.resourceTypes.add(resourceTypes.get(subresourceType));
         } else {
-            result.resourceTypes.add(new ResourceType(resourceType));
+            result.resourceTypes.add(resourceTypes.get(resourceType));
         }
     }
 

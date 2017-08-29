@@ -213,6 +213,7 @@ public class TsvParserTest {
         Entity entity = parser.next();
         assertEquals("Læringssti", entity.resourceTypes.get(0).name);
         assertEquals(1, entity.resourceTypes.size());
+        assertEquals("urn:resourcetype:learningPath", entity.resourceTypes.get(0).id.toString());
     }
 
     @Test

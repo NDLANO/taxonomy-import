@@ -289,6 +289,7 @@ public class Importer {
             if (isNotBlank(resourceType.parentName)) {
                 resourceType.parentId = resourceTypeCache.get(resourceType.parentName);
             }
+            System.out.println("Creating resource type " + resourceType.name + " with id: " + resourceType.id);
             URI location = restClient.createResourceType(resourceType.id, resourceType.name, resourceType.parentId);
             URI id = getId(location);
             resourceType.id = id;

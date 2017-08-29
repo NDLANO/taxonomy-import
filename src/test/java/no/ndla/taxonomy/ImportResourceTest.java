@@ -91,26 +91,27 @@ public class ImportResourceTest extends ImporterTest {
             type = "Resource";
             name = "Trigonometry explained";
             id = URI.create("urn:resource:1");
-            resourceTypes.add(new ResourceType("Fagstoff"));
+            resourceTypes.add(new ResourceType("Fagstoff", null, URI.create("urn:resourcetype:subjectMaterial")));
         }};
 
         importer.doImport(resource);
         ResourceTypeIndexDocument[] result = restTemplate.getForObject(baseUrl + "/v1/resources/" + resource.id + "/resource-types", ResourceTypeIndexDocument[].class);
         assertEquals(1, result.length);
         assertEquals("Fagstoff", result[0].name);
+        assertEquals(URI.create("urn:resourcetype:subjectMaterial"), result[0].id);
     }
 
     @Test
     public void can_replace_resource_type() throws Exception {
         Entity resource = new Entity() {{
             type = "Resource";
-            resourceTypes.add(new ResourceType("Fagstoff"));
+            resourceTypes.add(new ResourceType("Fagstoff", null, URI.create("urn:resourcetype:subjectMaterial")));
             id = URI.create("urn:resource:6");
         }};
 
         importer.doImport(resource);
         resource.resourceTypes.clear();
-        resource.resourceTypes.add(new ResourceType("Vedlegg"));
+        resource.resourceTypes.add(new ResourceType("Vedlegg", null, URI.create("urn:resourcetype:attachment")));
         importer.doImport(resource);
 
         ResourceTypeIndexDocument[] result = restTemplate.getForObject(baseUrl + "/v1/resources/" + resource.id + "/resource-types", ResourceTypeIndexDocument[].class);
@@ -123,9 +124,9 @@ public class ImportResourceTest extends ImporterTest {
         Entity resource = new Entity() {{
             type = "Resource";
             name = "Kildekritikk";
-            ResourceType parent = new ResourceType("Fagstoff");
+            ResourceType parent = new ResourceType("Fagstoff", null, URI.create("urn:resourcetype:subjectMaterial"));
             resourceTypes.add(parent);
-            ResourceType child = new ResourceType("Fagartikkel");
+            ResourceType child = new ResourceType("Fagartikkel", parent.name, URI.create("urn:resourcetype:article"));
             child.parentName = "Fagstoff";
             child.parentId = parent.id;
             resourceTypes.add(child);

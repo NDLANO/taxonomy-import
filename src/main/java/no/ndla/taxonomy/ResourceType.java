@@ -12,8 +12,9 @@ public class ResourceType {
         this.name = name;
     }
 
-    public ResourceType(String name, String parentName) {
+    public ResourceType(String name, String parentName, URI id) {
         this.name = name;
         this.parentName = parentName;
+        this.id = id;
     }
 }
