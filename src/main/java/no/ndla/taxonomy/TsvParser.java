@@ -10,7 +10,7 @@ public class TsvParser implements Iterator<Entity> {
 
     public static final String RESOURCE_TYPE = "Ressurstype";
     public static final String SUB_RESOURCE_TYPE = "Subressurstype";
-    public static final String LÆRINGSRESSURS = "Læringsressurs";
+    public static final String LEARNING_RESOURCE = "Læringsressurs";
     public static final String EMNE = "Emne";
     private Map<String, ResourceType> resourceTypes;
 
@@ -176,7 +176,7 @@ public class TsvParser implements Iterator<Entity> {
         String topicLevel1 = getField("Emne nivå 1");
         String topicLevel2 = getField("Emne nivå 2");
         String topicLevel3 = getField("Emne nivå 3");
-        String resourceName = getField(LÆRINGSRESSURS);
+        String resourceName = getField(LEARNING_RESOURCE);
 
         if (isNotBlank(topicLevel1)) {
             result.type = Importer.TOPIC_TYPE;
@@ -254,7 +254,7 @@ public class TsvParser implements Iterator<Entity> {
 
         ColumnMap() {
             String line = "";
-            while (!(line.contains(EMNE) || line.contains(LÆRINGSRESSURS))) line = lines.next();
+            while (!line.contains(LEARNING_RESOURCE)) line = lines.next();
 
             String[] specification = line.split("\t");
             for (int i = 0; i < specification.length; i++) {

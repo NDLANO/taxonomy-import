@@ -3,6 +3,7 @@ package no.ndla.taxonomy;
 import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
 import no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument;
 import no.ndla.taxonomy.client.resources.UpdateResourceCommand;
+import no.ndla.taxonomy.client.topicResources.TopicResourceIndexDocument;
 import org.junit.Test;
 
 import java.net.URI;
@@ -10,6 +11,7 @@ import java.net.URI;
 import static no.ndla.taxonomy.TestUtils.assertAnyTrue;
 import static no.ndla.taxonomy.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ImportResourceTest extends ImporterTest {
 
@@ -45,6 +47,41 @@ public class ImportResourceTest extends ImporterTest {
 
         ResourceIndexDocument result = restTemplate.getForObject(baseUrl + "/v1/resources/urn:resource:4", ResourceIndexDocument.class);
         assertEquals(entity.name, result.name);
+    }
+
+    @Test
+    public void can_add_resource_in_different_context() throws Exception {
+        Entity parentEntity = new Entity() {{
+            type = "Topic";
+            name = "Tall og algebra";
+            id = URI.create("urn:topic:2");
+        }};
+        importer.doImport(parentEntity);
+
+        Entity entity = new Entity() {{
+            type = "Resource";
+            name = "Tall og algebra fasit YF";
+            id = URI.create("urn:resource:4");
+            parent = parentEntity;
+        }};
+        importer.doImport(entity);
+
+        Entity parentEntity2 = new Entity() {{
+            type = "Topic";
+            name = "Sannsynlighet";
+            id = URI.create("urn:topic:3");
+        }};
+
+        entity.parent = parentEntity2;
+        
+        importer.doImport(parentEntity2);
+        importer.doImport(entity);
+
+        TopicResourceIndexDocument[] topicResources = restTemplate.getForObject(baseUrl + "/v1/topic-resources/", TopicResourceIndexDocument[].class);
+        assertTrue(2 >= topicResources.length);
+        assertAnyTrue(topicResources, tr -> tr.topicid.equals(parentEntity.id) && tr.resourceid.equals(entity.id));
+        assertAnyTrue(topicResources, tr -> tr.topicid.equals(parentEntity2.id) && tr.resourceid.equals(entity.id));
+
     }
 
     @Test
