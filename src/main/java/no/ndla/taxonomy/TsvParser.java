@@ -49,7 +49,6 @@ public class TsvParser implements Iterator<Entity> {
         String emne = "Emne";
 
         resourceTypes.put("Læringssti", new ResourceType("Læringssti", null, URI.create("urn:resourcetype:learningPath")));
-
         resourceTypes.put(fagstoff, new ResourceType(fagstoff, null, URI.create("urn:resourcetype:subjectMaterial")));
         resourceTypes.put(oppgaverOgAktiviteter, new ResourceType(oppgaverOgAktiviteter, null, URI.create("urn:resourcetype:tasksAndActivities")));
         resourceTypes.put(vurderingsressurs, new ResourceType(vurderingsressurs, null, URI.create("urn:resourcetype:reviewResource")));
@@ -72,17 +71,17 @@ public class TsvParser implements Iterator<Entity> {
         resourceTypes.put("Arbeidsoppdrag", new ResourceType("Arbeidsoppdrag", oppgaverOgAktiviteter, URI.create("urn:resourcetype:workAssignment")));
         resourceTypes.put("Forsøk", new ResourceType("Forsøk", oppgaverOgAktiviteter, URI.create("urn:resourcetype:experiment")));
         resourceTypes.put("Spill", new ResourceType("Spill", oppgaverOgAktiviteter, URI.create("urn:resourcetype:game")));
-        resourceTypes.put("Oppgaver og aktiviteter", new ResourceType("Oppgaver og aktiviteter", oppgaverOgAktiviteter, URI.create("urn:resourcetype:tasksAndActivities")));
 
         resourceTypes.put("Lærervurdering", new ResourceType("Lærervurdering", vurderingsressurs, URI.create("urn:resourcetype:teacherEvaluation")));
         resourceTypes.put("Egenvurdering", new ResourceType("Egenvurdering", vurderingsressurs, URI.create("urn:resourcetype:selfEvaluation")));
         resourceTypes.put("Medelevvurdering", new ResourceType("Medelevvurdering", vurderingsressurs, URI.create("urn:resourcetype:peerEvaulation")));
-        resourceTypes.put("Ekstern lenke", new ResourceType("Ekstern lenke", vurderingsressurs, URI.create("urn:resourcetype:externalLink")));
 
         resourceTypes.put("Ekstern lenke", new ResourceType("Ekstern lenke", eksternRessurs, URI.create("urn:resourcetype:externalLink")));
         resourceTypes.put("Delt læringsressurs", new ResourceType("Delt læringsressurs", eksternRessurs, URI.create("urn:resourcetype:sharedLearningResource")));
         resourceTypes.put("FYR-ressurs", new ResourceType("FYR-ressurs", eksternRessurs, URI.create("urn:resourcetype:FYRResource")));
 
+        resourceTypes.put("Spillefilm", new ResourceType("Spillefilm", kildemateriale, URI.create("urn:resourcetype:featureFilm")));
+        resourceTypes.put("Kortfilm", new ResourceType("Kortfilm", kildemateriale, URI.create("urn:resourcetype:shortFilm")));
         resourceTypes.put("Historisk materiale", new ResourceType("Historisk materiale", kildemateriale, URI.create("urn:resourcetype:historicalMaterial")));
         resourceTypes.put("Malerier- grafikk -kunstfoto", new ResourceType("Malerier- grafikk -kunstfoto", kildemateriale, URI.create("urn:resourcetype:paintingGraphicsPhoto")));
         resourceTypes.put("Litterære tekster", new ResourceType("Litterære tekster", kildemateriale, URI.create("urn:resourcetype:literaryText")));
@@ -236,12 +235,26 @@ public class TsvParser implements Iterator<Entity> {
         String resourceType = getField(RESOURCE_TYPE);
         if (isBlank(resourceType) && isBlank(subresourceType)) return;
 
-
+        assertValidResourceType(resourceType, subresourceType);
         if (isNotBlank(subresourceType)) {
             result.resourceTypes.add(resourceTypes.get(resourceTypes.get(subresourceType).parentName));
             result.resourceTypes.add(resourceTypes.get(subresourceType));
         } else {
             result.resourceTypes.add(resourceTypes.get(resourceType));
+        }
+    }
+
+    private void assertValidResourceType(String resourceType, String subresourceType) {
+
+        if (isNotBlank(resourceType)) {
+            if (resourceTypes.get(resourceType) == null) {
+                throw new MissingParameterException("Unknown resource type: " + resourceType, lines.getLineNumber());
+            }
+        }
+        if (isNotBlank(subresourceType)) {
+            if (resourceTypes.get(subresourceType) == null) {
+                throw new MissingParameterException("Unknown resource type: " + subresourceType, lines.getLineNumber());
+            }
         }
     }
 

@@ -66,7 +66,7 @@ public class TsvParserTest {
 
     @Test
     public void can_get_nodeid_from_node_type_url() throws Exception {
-        init("\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t");
+        init("\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tFagstoff\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t");
 
         Entity entity = parser.next();
         assertEquals("138016", entity.nodeId);
@@ -74,7 +74,7 @@ public class TsvParserTest {
 
     @Test
     public void can_get_nodeid_from_quiz_type_url() throws Exception {
-        init("\t\t\tTallregning\t\thttp://red.ndla.no/nb/quiz/5960?fag=54\tInteraktivitet\t1T-ST\tTilleggsstoff\t1T-YF\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t");
+        init("\t\t\tTallregning\t\thttp://red.ndla.no/nb/quiz/5960?fag=54\tOppgave\t1T-ST\tTilleggsstoff\t1T-YF\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t");
 
         Entity entity = parser.next();
         assertEquals("5960", entity.nodeId);
@@ -82,7 +82,15 @@ public class TsvParserTest {
 
     @Test
     public void can_get_nodeid_from_h5pcontent_type_url() throws Exception {
-        init("\t\t\tTallregning\t\thttp://red.ndla.no/nb/h5pcontent/125735?fag=54\tInteraktivitet\t1T-ST\tKjernestoff\t1T-YF\tKjernestoff\t\t\t\t\t\t\t\t\t\t");
+        init("\t\t\tTallregning\t\thttp://red.ndla.no/nb/h5pcontent/125735?fag=54\tOppgave\t1T-ST\tKjernestoff\t1T-YF\tKjernestoff\t\t\t\t\t\t\t\t\t\t");
+
+        Entity entity = parser.next();
+        assertEquals("125735", entity.nodeId);
+    }
+
+    @Test
+    public void can_get_nodeid_from_incomplete_url() throws Exception {
+        init("\t\t\tTallregning\t\tred.ndla.no/nb/h5pcontent/125735?fag=54\tOppgave\t1T-ST\tKjernestoff\t1T-YF\tKjernestoff\t\t\t\t\t\t\t\t\t\t");
 
         Entity entity = parser.next();
         assertEquals("125735", entity.nodeId);
@@ -101,7 +109,7 @@ public class TsvParserTest {
     public void resource_can_have_level_one_topic_parent() throws Exception {
         String[] lines = {
                 "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
-                "\t\t\tTall og algebra fasit YF	Tal og algebra fasit YF	http://red.ndla.no/nb/node/138016?fag=54	Vedlegg	1T-YF	Kjernestoff	1T-ST	Tilleggsstoff										"
+                "\t\t\tTall og algebra fasit YF	Tal og algebra fasit YF	http://red.ndla.no/nb/node/138016?fag=54	Fagstoff	1T-YF	Kjernestoff	1T-ST	Tilleggsstoff										"
         };
         init(lines);
 
@@ -117,7 +125,7 @@ public class TsvParserTest {
         String[] lines = {
                 "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
                 "\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
-                "\t\t\tTall og algebra fasit YF	Tal og algebra fasit YF	http://red.ndla.no/nb/node/138016?fag=54	Vedlegg	1T-YF	Kjernestoff	1T-ST	Tilleggsstoff										"
+                "\t\t\tTall og algebra fasit YF	Tal og algebra fasit YF	http://red.ndla.no/nb/node/138016?fag=54	Fagstoff	1T-YF	Kjernestoff	1T-ST	Tilleggsstoff										"
         };
         init(lines);
 
@@ -136,7 +144,7 @@ public class TsvParserTest {
                 "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
                 "\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
                 "\t\tTallmengder\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
-                "\t\t\tTall og algebra fasit YF	Tal og algebra fasit YF	http://red.ndla.no/nb/node/138016?fag=54	Vedlegg	1T-YF	Kjernestoff	1T-ST	Tilleggsstoff										"
+                "\t\t\tTall og algebra fasit YF	Tal og algebra fasit YF	http://red.ndla.no/nb/node/138016?fag=54	Fagstoff	1T-YF	Kjernestoff	1T-ST	Tilleggsstoff										"
         };
         init(lines);
 
@@ -208,6 +216,14 @@ public class TsvParserTest {
     }
 
     @Test
+    public void unknown_resource_type_fails() throws Exception {
+        init("Læringsressurs\tRessurstype", new String[]{"Introduksjon til algebra\tUkjent"});
+        expectedException.expect(MissingParameterException.class);
+        expectedException.expectMessage("Unknown resource type");
+        Entity entity = parser.next();
+    }
+
+    @Test
     public void learning_path_is_top_level_resource_type() throws Exception {
         init("Læringsressurs\tRessurstype\tSubressurstype", new String[]{"Introduksjon til algebra\tLæringssti\t"});
         Entity entity = parser.next();
@@ -275,9 +291,9 @@ public class TsvParserTest {
 
     @Test
     public void resources_have_rank() throws Exception {
-        String[] lines = {"\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
-                "\t\t\tTall og algebra løsningsforslag YF\tTal og algebra løysingsforslag YF\thttp://red.ndla.no/nb/node/138015?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
-                "\t\t\tTall og algebra oppgavesamling YF\tTal og algebra oppgåvesamling YF\thttp://red.ndla.no/nb/node/138014?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n"};
+        String[] lines = {"\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tFagstoff\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
+                "\t\t\tTall og algebra løsningsforslag YF\tTal og algebra løysingsforslag YF\thttp://red.ndla.no/nb/node/138015?fag=54\tFagstoff\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
+                "\t\t\tTall og algebra oppgavesamling YF\tTal og algebra oppgåvesamling YF\thttp://red.ndla.no/nb/node/138014?fag=54\tFagstoff\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n"};
         init(lines);
         Entity entity1 = parser.next();
         Entity entity2 = parser.next();
@@ -291,8 +307,8 @@ public class TsvParserTest {
     @Test
     public void topics_have_rank() throws Exception {
         String[] lines = {"Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n",
-                "\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
-                "\t\t\tTall og algebra løsningsforslag YF\tTal og algebra løysingsforslag YF\thttp://red.ndla.no/nb/node/138015?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
+                "\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tFagstoff\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
+                "\t\t\tTall og algebra løsningsforslag YF\tTal og algebra løysingsforslag YF\thttp://red.ndla.no/nb/node/138015?fag=54\tFagstoff\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
                 "\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n"};
                 init(lines);
         Entity entity1 = parser.next();
@@ -307,8 +323,8 @@ public class TsvParserTest {
     public void resources_under_new_topic_restarts_rank_count() throws Exception {
         String[] lines = {
                 "Tall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n",
-                "\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
-                "\t\t\tTall og algebra løsningsforslag YF\tTal og algebra løysingsforslag YF\thttp://red.ndla.no/nb/node/138015?fag=54\tVedlegg\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
+                "\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tFagstoff\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
+                "\t\t\tTall og algebra løsningsforslag YF\tTal og algebra løysingsforslag YF\thttp://red.ndla.no/nb/node/138015?fag=54\tFagstoff\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
                 "\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n",
                 "\t\t\tTall og tallmengder\t\thttp://red.ndla.no/nb/node/175926?fag=54\tLæringssti\t1T-ST\tKjernestoff\t1T-YF\tKjernestoff\t\t\t\t\t\t\t\t\t\t\n"};
         init(lines);
