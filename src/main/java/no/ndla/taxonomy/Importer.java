@@ -304,6 +304,9 @@ public class Importer {
         no.ndla.taxonomy.client.resourceTypes.ResourceTypeIndexDocument[] resourceTypes = restClient.getResourceTypes();
         for (no.ndla.taxonomy.client.resourceTypes.ResourceTypeIndexDocument resourceType : resourceTypes) {
             resourceTypeCache.put(resourceType.name, resourceType.id);
+            for (no.ndla.taxonomy.client.resourceTypes.ResourceTypeIndexDocument subtype : resourceType.subtypes) {
+                resourceTypeCache.put(subtype.name, subtype.id);
+            }
         }
     }
 
