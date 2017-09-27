@@ -185,7 +185,7 @@ public class TaxonomyRestClient {
     }
 
     public void removeResourceFilter(URI connectionId) {
-        restTemplate.delete(urlBase + "/v1/resource-filter/{id}", Collections.singletonMap("id", connectionId.toString()));
+        restTemplate.delete(urlBase + "/v1/resource-filters/{id}", Collections.singletonMap("id", connectionId.toString()));
     }
 
     public URI addResourceFilter(URI resourceId, URI filterId, URI relevanceId) {
