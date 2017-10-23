@@ -93,15 +93,15 @@ public class Importer {
                 for (TopicIndexDocument topic : topicsForSubject) {
                     if (topic.id.equals(entity.id)) {
                         TopicSubtopicIndexDocument topicSubtopic = restClient.getTopicSubtopic(topic.connectionId);
-                        System.out.println("Updating topic subtopic connection for topic: " + entity.id);
+                        System.out.println("Updating topic subtopic connection for topic: " + entity.id + " with rank " + entity.rank);
                         topicSubtopic.rank = entity.rank;
                         restClient.updateTopicSubtopic(topicSubtopic);
                         return;
                     }
                 }
             }
-            System.out.println("Adding topic subtopics connection for topic: " + entity.id);
-            restClient.addTopicSubtopic(entity.parent.id, entity.id);
+            System.out.println("Adding topic subtopics connection for topic: " + entity.id + " with rank " + entity.rank);
+            restClient.addTopicSubtopic(entity.parent.id, entity.id, entity.rank);
         } catch (Exception e) {
             e.printStackTrace();
         }

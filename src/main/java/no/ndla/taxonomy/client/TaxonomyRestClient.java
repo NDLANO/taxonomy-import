@@ -117,10 +117,11 @@ public class TaxonomyRestClient {
         return restTemplate.getForObject(url, TopicIndexDocument.class);
     }
 
-    public URI addTopicSubtopic(URI topicId, URI subtopicId) {
+    public URI addTopicSubtopic(URI topicId, URI subtopicId, int rank) {
         AddSubtopicToTopicCommand cmd = new AddSubtopicToTopicCommand();
         cmd.topicid = topicId;
         cmd.subtopicid = subtopicId;
+        cmd.rank = rank;
         return restTemplate.postForLocation(urlBase + "/v1/topic-subtopics", cmd);
     }
 
