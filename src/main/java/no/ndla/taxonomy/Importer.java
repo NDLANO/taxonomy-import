@@ -367,4 +367,8 @@ public class Importer {
         return location;
     }
 
+    public void doImportWithoutBatchmode(Entity entity) {
+        restClient.setNoBatchMode();
+        doImport(entity);
+    }
 }

@@ -26,12 +26,11 @@ import no.ndla.taxonomy.client.topicSubtopics.TopicSubtopicIndexDocument;
 import no.ndla.taxonomy.client.topicSubtopics.UpdateTopicSubtopicCommand;
 import no.ndla.taxonomy.client.topics.CreateTopicCommand;
 import no.ndla.taxonomy.client.topics.TopicIndexDocument;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TaxonomyRestClient {
     private RestTemplate restTemplate;
@@ -40,6 +39,11 @@ public class TaxonomyRestClient {
     public TaxonomyRestClient(String urlBase, RestTemplate restTemplate) {
         this.urlBase = urlBase;
         this.restTemplate = restTemplate;
+
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+        interceptors.add(new HeaderRequestInterceptor("batch", "1"));
+
+        restTemplate.setInterceptors(interceptors);
     }
 
     private static final Map<String, String> controllerNames = new HashMap<String, String>() {
@@ -271,5 +275,13 @@ public class TaxonomyRestClient {
 
         String url = urlBase + "/v1/subject-topics/" + subjectTopic.id;
         restTemplate.put(url, command);
+    }
+
+    public void setNoBatchMode() {
+        List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
+        interceptors.clear();
+        interceptors.add(new HeaderRequestInterceptor("batch", "0"));
+        System.out.println("Unsetting batch mode");
+        restTemplate.setInterceptors(interceptors);
     }
 }

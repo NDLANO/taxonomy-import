@@ -70,10 +70,18 @@ public class ImporterApplication {
         importer.doImport(subject);
 
         Iterator<Entity> entities = new TsvParser(iterator, subject);
+        Entity entity = null;
+
         while (entities.hasNext()) {
-            Entity entity = entities.next();
+            entity = entities.next();
             importer.doImport(entity);
         }
+
+        generateUrlCacheRebuild(entity, importer);
+    }
+
+    private void generateUrlCacheRebuild(Entity entity, Importer importer) {
+        importer.doImportWithoutBatchmode(entity);
     }
 
     @Bean
