@@ -212,12 +212,25 @@ public class TsvParser implements Iterator<Entity> {
 
     private void setNodeId() {
         String urlString = getField("Lenke til gammelt system");
-        if (isBlank(urlString)) return;
+        if (isBlank(urlString)) {
+            System.out.println("Nodeid not found.");
+            return;
+        }
 
         String[] urlParts = urlString.split("/");
         String parametersString = urlParts[urlParts.length - 1];
         String[] parameters = parametersString.split("\\?");
+        assertNumber(parameters[0]);
         result.nodeId = parameters[0];
+    }
+
+    private void assertNumber(String nodeId) {
+        try {
+            new Integer(nodeId);
+        } catch (Exception e) {
+            System.out.println("Line " + lines.getLineNumber() + " Node id: " + nodeId + " is not a number.");
+            throw e;
+        }
     }
 
     private void setTranslatedName() {
