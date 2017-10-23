@@ -104,6 +104,8 @@ public class TsvParser implements Iterator<Entity> {
             if (isBlank(doImport)) return null;
         }
 
+        System.out.println("Importing line: ");
+        System.out.println(line);
         result = new Entity();
 
         setEntityLevelInformation();
@@ -124,6 +126,7 @@ public class TsvParser implements Iterator<Entity> {
 
             if (isBlank(filterName)) continue;
 
+            System.out.println("Setting filter " + filterName + " with relevance " + relevanceName);
             result.filters.add(new Filter() {{
                 name = filterName;
                 relevance = new Relevance() {{
@@ -169,6 +172,8 @@ public class TsvParser implements Iterator<Entity> {
         } else {
             result.parent = currentSubject;
         }
+        System.out.println("Parent: " + result.parent.nodeId);
+
     }
 
     private void setEntityLevelInformation() {
@@ -187,6 +192,7 @@ public class TsvParser implements Iterator<Entity> {
             currentTopicLevelTwoRank = 0;
             currentTopicLevelThreeRank = 0;
             currentResourceRank = 0;
+            System.out.println("Setting topic level 1");
         } else if (isNotBlank(topicLevel2)) {
             result.type = Importer.TOPIC_TYPE;
             result.name = topicLevel2;
@@ -195,16 +201,19 @@ public class TsvParser implements Iterator<Entity> {
             result.rank = ++currentTopicLevelTwoRank;
             currentTopicLevelThreeRank = 0;
             currentResourceRank = 0;
+            System.out.println("Setting topic level 2");
         } else if (isNotBlank(topicLevel3)) {
             result.type = Importer.TOPIC_TYPE;
             result.name = topicLevel3;
             currentLevelThreeTopic = result;
             result.rank = ++currentTopicLevelThreeRank;
             currentResourceRank = 0;
+            System.out.println("Setting topic level 3");
         } else if (isNotBlank(resourceName)) {
             result.type = Importer.RESOURCE_TYPE;
             result.name = resourceName;
             result.rank = ++currentResourceRank;
+            System.out.println("Setting resource");
         } else {
             throw new MissingParameterException("Entity must be named", lines.getLineNumber());
         }
@@ -246,14 +255,19 @@ public class TsvParser implements Iterator<Entity> {
     private void setResourceType() {
         String subresourceType = getField(SUB_RESOURCE_TYPE);
         String resourceType = getField(RESOURCE_TYPE);
-        if (isBlank(resourceType) && isBlank(subresourceType)) return;
+        if (isBlank(resourceType) && isBlank(subresourceType)) {
+            System.out.println("No resoure type found.");
+            return;
+        }
 
         assertValidResourceType(resourceType, subresourceType);
         if (isNotBlank(subresourceType)) {
             result.resourceTypes.add(resourceTypes.get(resourceTypes.get(subresourceType).parentName));
             result.resourceTypes.add(resourceTypes.get(subresourceType));
+            System.out.println("Adding rt " + subresourceType + "w parent: " + resourceTypes.get(subresourceType).parentName);
         } else {
             result.resourceTypes.add(resourceTypes.get(resourceType));
+            System.out.println("Adding rt: " + resourceType);
         }
     }
 

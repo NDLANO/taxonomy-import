@@ -45,6 +45,7 @@ public class Importer {
         }
 
         URI location = importEntity(entity);
+        System.out.println("Entity imported: " + entity.nodeId);
         entity.id = getId(location);
 
         if (entity.parent != null && entity.parent.type.equals(SUBJECT_TYPE) && entity.type.equals(TOPIC_TYPE)) {
@@ -81,6 +82,7 @@ public class Importer {
             System.out.println("Adding topic resource for: " + entity.id);
             restClient.addTopicResource(entity.parent.id, entity.id, entity.rank);
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -101,6 +103,7 @@ public class Importer {
             System.out.println("Adding topic subtopics connection for topic: " + entity.id);
             restClient.addTopicSubtopic(entity.parent.id, entity.id);
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -131,8 +134,8 @@ public class Importer {
 
         try {
             ResourceIndexDocument resource = restClient.getResource(entity.id);
-            System.out.println("Updating resource: " + entity.id);
             URI location = updateResource(entity, resource);
+            System.out.println("Updated resource: " + entity.id);
             //get rts for resource, check if replace should be done
             updateResourceResourceTypeConnections(entity);
             updateFilters(entity);
@@ -153,6 +156,7 @@ public class Importer {
         for (Filter filter : entity.filters) {
             if (currentFilters.stream().noneMatch(f -> f.name.equalsIgnoreCase(filter.name))) {
                 addFilterToResource(entity.id, filter, subject.id);
+                System.out.println("Added filter resource connection: " + filter.name);
             }
         }
 
@@ -240,6 +244,7 @@ public class Importer {
         for (ResourceType resourceType : entity.resourceTypes) {
             if (currentResourceTypes.stream().noneMatch(rt -> rt.name.equalsIgnoreCase(resourceType.name))) {
                 addResourceTypeToResource(entity.id, resourceType);
+                System.out.println("Importing resource resource type connection: " + resourceType.name);
             }
         }
 
@@ -268,6 +273,7 @@ public class Importer {
     private URI createResource(Entity entity) {
         URI location = restClient.createResource(entity.id, entity.name, entity.contentUri);
         entity.id = getId(location);
+        System.out.println("Added resource: " + entity.id);
         addResourceTypesToResource(entity.id, entity.resourceTypes);
         return location;
     }
@@ -325,6 +331,7 @@ public class Importer {
             System.out.println("Adding topic " + entity.id + " to subject " + entity.parent.id);
             restClient.addSubjectTopic(entity.parent.id, entity.id, entity.rank);
         } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -332,8 +339,9 @@ public class Importer {
         URI location;
         try {
             restClient.getTopic(entity.id);
-            System.out.println("Updating topic: " + entity.id);
+            System.out.println("Importing topic");
             location = restClient.updateEntity(entity.id, entity.name, entity.contentUri, TOPIC_TYPE);
+            System.out.println("Updated topic: " + entity.id);
         } catch (Exception e) {
             if (entity.nodeId != null && entity.id == null) {
                 entity.id = URI.create("urn:topic:1:" + entity.nodeId);
