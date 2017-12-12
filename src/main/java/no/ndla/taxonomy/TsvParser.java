@@ -137,9 +137,18 @@ public class TsvParser implements Iterator<Entity> {
 
         setEntityLevelInformation();
         setTranslatedName();
-        setNodeId();
+        boolean foundNodeId = setNodeId();
+        if (!foundNodeId) {
+            System.out.println("Skipping entity " + result.name + ", no node id.");
+            return null;
+        }
+        if (result.type.equals(Importer.RESOURCE_TYPE)) {
+            if(!setResourceType()) {
+                System.out.println("Skipping entity " + result.nodeId +  ", no resource type.");
+                return null;
+            }
+        }
         setParent();
-        setResourceType();
         setFilters();
 
         return result;
@@ -246,22 +255,23 @@ public class TsvParser implements Iterator<Entity> {
         }
     }
 
-    private void setNodeId() {
+    private boolean setNodeId() {
         String urlString = getField(NODE_ID_FIELD);
         if (isBlank(urlString)) {
             System.out.println("Nodeid not found.");
-            return;
+            return false;
         }
 
         String[] urlParts = urlString.split("/");
         String parametersString = urlParts[urlParts.length - 1];
         String[] parameters = parametersString.split("\\?");
-        if (parameters[0].equals("verktoy") || parameters[0].equals("naturbruk")) {
-            result.nodeId = parameters[0] + ":" + parameters[1].split("=")[0];
+        if (urlParts[urlParts.length-2].equals("verktoy") || urlParts[urlParts.length-2].equals("naturbruk")) {
+            result.nodeId = urlParts[urlParts.length-2] + ":" + parameters[0];
         } else {
             assertNumber(parameters[0]);
             result.nodeId = parameters[0];
         }
+        return true;
     }
 
     private void assertNumber(String nodeId) {
@@ -283,12 +293,12 @@ public class TsvParser implements Iterator<Entity> {
     }
 
 
-    private void setResourceType() {
+    private boolean setResourceType() {
         String subresourceType = getField(SUB_RESOURCE_TYPE);
         String resourceType = getField(RESOURCE_TYPE);
         if (isBlank(resourceType) && isBlank(subresourceType)) {
             System.out.println("No resource type found.");
-            return;
+            return false;
         }
 
         assertValidResourceType(resourceType, subresourceType);
@@ -302,6 +312,7 @@ public class TsvParser implements Iterator<Entity> {
             result.resourceTypes.add(resourceTypes.get(resourceType));
             System.out.println("Adding rt: " + resourceType);
         }
+        return true;
     }
 
     private void assertValidResourceType(String resourceType, String subresourceType) {
