@@ -159,22 +159,6 @@ public class Importer {
                 System.out.println("Added filter resource connection: " + filter.name);
             }
         }
-
-        for (FilterIndexDocument filter : currentFilters) {
-            if (entity.filters.stream().noneMatch(rt -> rt.name.equalsIgnoreCase(filter.name))) {
-                removeFilterFromResource(filter.connectionId);
-            }
-        }
-    }
-
-    private void removeFilterFromResource(URI connectionId) {
-        restClient.removeResourceFilter(connectionId);
-    }
-
-    private void addFiltersToResource(URI resourceId, List<Filter> filters, URI subjectId) {
-        for (Filter filter : filters) {
-            addFilterToResource(resourceId, filter, subjectId);
-        }
     }
 
     private void addFilterToResource(URI resourceId, Filter filter, URI subjectId) {

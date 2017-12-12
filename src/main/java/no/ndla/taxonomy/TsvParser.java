@@ -12,6 +12,10 @@ public class TsvParser implements Iterator<Entity> {
     public static final String SUB_RESOURCE_TYPE = "Subressurstype";
     public static final String LEARNING_RESOURCE = "Læringsressurs";
     public static final String EMNE = "Emne";
+    private static final String NODE_ID_FIELD = "Lenke til gammelt system";
+    private static final String TOPIC_LEVEL_ONE = "Emne nivå 1";
+    public static final String TOPIC_LEVEL_TWO = "Emne nivå 2";
+    private static final String TOPIC_LEVEL_THREE = "Emne nivå 3";
     private Map<String, ResourceType> resourceTypes;
 
     private StringIterator lines;
@@ -36,7 +40,29 @@ public class TsvParser implements Iterator<Entity> {
         this.lines = lines;
         this.currentSubject = subject;
         this.columnMap = new ColumnMap();
+        assertCorrectHeaderFieldsPresent();
         buildResourceTypeParents();
+    }
+
+    private void assertCorrectHeaderFieldsPresent() {
+        if(!hasField(RESOURCE_TYPE)) {
+            throw new MissingParameterException(RESOURCE_TYPE);
+        }
+        if (!hasField(SUB_RESOURCE_TYPE)) {
+            throw new MissingParameterException(SUB_RESOURCE_TYPE);
+        }
+        if (!hasField(NODE_ID_FIELD)) {
+            throw new MissingParameterException(NODE_ID_FIELD);
+        }
+        if (!hasField(TOPIC_LEVEL_ONE)) {
+            throw new MissingParameterException(TOPIC_LEVEL_ONE);
+        }
+        if (!hasField(TOPIC_LEVEL_TWO)) {
+            throw new MissingParameterException(TOPIC_LEVEL_TWO);
+        }
+        if (!hasField(TOPIC_LEVEL_THREE)) {
+            throw new MissingParameterException(TOPIC_LEVEL_THREE);
+        }
     }
 
     private void buildResourceTypeParents() {
@@ -49,6 +75,7 @@ public class TsvParser implements Iterator<Entity> {
         String emne = "Emne";
 
         resourceTypes.put("Læringssti", new ResourceType("Læringssti", null, URI.create("urn:resourcetype:learningPath")));
+        resourceTypes.put("Begrep", new ResourceType("Begrep", null, URI.create("urn:resourcetype:concept")));
         resourceTypes.put(fagstoff, new ResourceType(fagstoff, null, URI.create("urn:resourcetype:subjectMaterial")));
         resourceTypes.put(oppgaverOgAktiviteter, new ResourceType(oppgaverOgAktiviteter, null, URI.create("urn:resourcetype:tasksAndActivities")));
         resourceTypes.put(vurderingsressurs, new ResourceType(vurderingsressurs, null, URI.create("urn:resourcetype:reviewResource")));
@@ -177,9 +204,9 @@ public class TsvParser implements Iterator<Entity> {
     }
 
     private void setEntityLevelInformation() {
-        String topicLevel1 = getField("Emne nivå 1");
-        String topicLevel2 = getField("Emne nivå 2");
-        String topicLevel3 = getField("Emne nivå 3");
+        String topicLevel1 = getField(TOPIC_LEVEL_ONE);
+        String topicLevel2 = getField(TOPIC_LEVEL_TWO);
+        String topicLevel3 = getField(TOPIC_LEVEL_THREE);
         String resourceName = getField(LEARNING_RESOURCE);
 
         if (isNotBlank(topicLevel1)) {
@@ -220,7 +247,7 @@ public class TsvParser implements Iterator<Entity> {
     }
 
     private void setNodeId() {
-        String urlString = getField("Lenke til gammelt system");
+        String urlString = getField(NODE_ID_FIELD);
         if (isBlank(urlString)) {
             System.out.println("Nodeid not found.");
             return;
@@ -229,8 +256,12 @@ public class TsvParser implements Iterator<Entity> {
         String[] urlParts = urlString.split("/");
         String parametersString = urlParts[urlParts.length - 1];
         String[] parameters = parametersString.split("\\?");
-        assertNumber(parameters[0]);
-        result.nodeId = parameters[0];
+        if (parameters[0].equals("verktoy") || parameters[0].equals("naturbruk")) {
+            result.nodeId = parameters[0] + ":" + parameters[1].split("=")[0];
+        } else {
+            assertNumber(parameters[0]);
+            result.nodeId = parameters[0];
+        }
     }
 
     private void assertNumber(String nodeId) {
@@ -256,16 +287,18 @@ public class TsvParser implements Iterator<Entity> {
         String subresourceType = getField(SUB_RESOURCE_TYPE);
         String resourceType = getField(RESOURCE_TYPE);
         if (isBlank(resourceType) && isBlank(subresourceType)) {
-            System.out.println("No resoure type found.");
+            System.out.println("No resource type found.");
             return;
         }
 
         assertValidResourceType(resourceType, subresourceType);
         if (isNotBlank(subresourceType)) {
+            subresourceType = subresourceType.trim();
             result.resourceTypes.add(resourceTypes.get(resourceTypes.get(subresourceType).parentName));
             result.resourceTypes.add(resourceTypes.get(subresourceType));
             System.out.println("Adding rt " + subresourceType + "w parent: " + resourceTypes.get(subresourceType).parentName);
         } else {
+            resourceType = resourceType.trim();
             result.resourceTypes.add(resourceTypes.get(resourceType));
             System.out.println("Adding rt: " + resourceType);
         }
