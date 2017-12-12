@@ -139,7 +139,10 @@ public class TsvParser implements Iterator<Entity> {
         setTranslatedName();
         boolean foundNodeId = setNodeId();
         if (!foundNodeId) {
-            System.out.println("Skipping entity " + result.name + ", no node id.");
+            if (result.type.equals(Importer.TOPIC_TYPE)) {
+                throw new MissingParameterException("Topic is missing nodeid", lines.getLineNumber());
+            }
+            System.out.println("Skipping entity " + result.name + ", no nodeid.");
             return null;
         }
         if (result.type.equals(Importer.RESOURCE_TYPE)) {

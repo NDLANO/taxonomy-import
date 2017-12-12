@@ -136,6 +136,21 @@ public class TsvParserTest {
     }
 
     @Test
+    public void missing_node_id_not_allowed() {
+        init("x\t\t\t\tTittel\t\t\tFagstoff\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
+        Entity entity = parser.next();
+        assertNull(entity);
+    }
+
+    @Test
+    public void missing_node_id_for_topic_raises_error() {
+        init("x\tEmnetittel\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
+        expectedException.expect(MissingParameterException.class);
+        expectedException.expectMessage("nodeid");
+        parser.next();
+    }
+
+    @Test
     public void can_have_translation() throws Exception {
         init("x\tTall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\tFagstoff\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
         Entity entity = parser.next();
@@ -184,7 +199,7 @@ public class TsvParserTest {
 
     @Test
     public void can_get_nodeid_from_verktoy_path_url() throws Exception {
-        init("x\t\t\t\tTallregning\t\thttps://liste.ndla.no/listing/verktoy/blikkenslageren\tOppgave\t\t1T-ST\tKjernestoff\t1T-YF\tKjernestoff\t\t\t\t\t\t\t\t\t");
+        init("x\t\t\t\tTallregning\t\tverktoy/blikkenslageren\tOppgave\t\t1T-ST\tKjernestoff\t1T-YF\tKjernestoff\t\t\t\t\t\t\t\t\t");
         Entity entity = parser.next();
         assertEquals("verktoy:blikkenslageren", entity.nodeId);
     }
@@ -311,7 +326,7 @@ public class TsvParserTest {
     @Test
     public void unknown_resource_type_skips_resource() throws Exception {
         init("Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tLenke til gammelt system\tRessurstype\tSubressurstype",
-                new String[]{"\t\tIntroduksjon til algebra\t\t\tUkjent\t"});
+                new String[]{"\t\t\tIntroduksjon til algebra\t\tUkjent\t"});
         Entity entity = parser.next();
         assertNull(entity);
     }
