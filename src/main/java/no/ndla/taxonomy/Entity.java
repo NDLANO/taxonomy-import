@@ -18,6 +18,7 @@ public class Entity {
 
     public Entity parent;
     public List<Filter> filters = new ArrayList<>();
+    public boolean shouldSetPrimary = false;
 
     public void setId(String id) {
         this.id = URI.create(id);

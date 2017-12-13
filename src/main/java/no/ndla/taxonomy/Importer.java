@@ -68,6 +68,7 @@ public class Importer {
 
     private void importTopicResource(Entity entity) {
         try {
+            boolean currentTopicConnectionFound = false;
             no.ndla.taxonomy.client.topics.ResourceIndexDocument[] resourcesForTopic = restClient.getResourcesForTopic(entity.parent.id);
             for (no.ndla.taxonomy.client.topics.ResourceIndexDocument resource : resourcesForTopic) {
                 if (resource.id.equals(entity.id)) {
@@ -75,12 +76,21 @@ public class Importer {
                     System.out.println("Updating topic resource for resource: " + entity.id);
                     topicResource.rank = entity.rank;
                     topicResource.topicid = entity.parent.id;
+                    if (entity.parent.id.equals(topicResource.topicid) && entity.shouldSetPrimary) {
+                        topicResource.primary = true;
+                    }
                     restClient.updateTopicResource(topicResource);
-                    return;
+                    currentTopicConnectionFound = topicResource.topicid.equals(entity.parent.id);
                 }
             }
-            System.out.println("Adding topic resource for: " + entity.id);
-            restClient.addTopicResource(entity.parent.id, entity.id, entity.rank);
+            if (!currentTopicConnectionFound) {
+                System.out.println("Adding topic resource for: " + entity.id);
+                if (entity.shouldSetPrimary) {
+                    restClient.addTopicResource(entity.parent.id, entity.id, entity.rank, true);
+                } else {
+                    restClient.addTopicResource(entity.parent.id, entity.id, entity.rank);
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -88,6 +98,7 @@ public class Importer {
 
     private void importTopicSubtopic(Entity entity) {
         try {
+            boolean hasFoundCurrentTopicConnection = false;
             if (currentSubject != null) {
                 TopicIndexDocument[] topicsForSubject = restClient.getTopicsForSubject(currentSubject.id);
                 for (TopicIndexDocument topic : topicsForSubject) {
@@ -95,13 +106,24 @@ public class Importer {
                         TopicSubtopicIndexDocument topicSubtopic = restClient.getTopicSubtopic(topic.connectionId);
                         System.out.println("Updating topic subtopic connection for topic: " + entity.id + " with rank " + entity.rank);
                         topicSubtopic.rank = entity.rank;
+                        if (entity.parent.id.equals(topicSubtopic.topicid) && entity.shouldSetPrimary) {
+                            topicSubtopic.primary = true;
+                        }
                         restClient.updateTopicSubtopic(topicSubtopic);
-                        return;
+                        if (!hasFoundCurrentTopicConnection) {
+                            hasFoundCurrentTopicConnection = topicSubtopic.topicid.equals(entity.parent.id);
+                        }
                     }
                 }
             }
-            System.out.println("Adding topic subtopics connection for topic: " + entity.id + " with rank " + entity.rank);
-            restClient.addTopicSubtopic(entity.parent.id, entity.id, entity.rank);
+            if (!hasFoundCurrentTopicConnection) {
+                System.out.println("Adding topic subtopics connection for topic: " + entity.id + " with rank " + entity.rank);
+                if (entity.shouldSetPrimary) {
+                    restClient.addTopicSubtopic(entity.parent.id, entity.id, entity.rank, true);
+                } else {
+                    restClient.addTopicSubtopic(entity.parent.id, entity.id, entity.rank);
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

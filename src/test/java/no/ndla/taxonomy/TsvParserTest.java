@@ -497,6 +497,19 @@ public class TsvParserTest {
 
     }
 
+    @Test
+    public void entity_can_have_primary_connection_indication() {
+        init("Import	Emne nivå 1	Emne nivå 2	Emne nivå 3	Læringsressurs	Primærtilknytning	nn	revidert?	Publisert	Kvalitetssikring	Lenke til gammelt system	Ressurstype	Subressurstype	Flere ressurstyper? (x)	Hvilke andre ressurstyper?	Filter 	Relevans	Filter 	Relevans	Filter 	RelevansFilter 	Relevans	Filter 	Relevans	Filter 	Relevans	Filter 	Relevans",
+                new String[] {
+                "x	Helse og sykdom							x		http://red.ndla.no/nb/node/172816?fag=52					YF VG2	Kjernestoff",
+        "x		Allmennstilstand og helsefagarbeiderens rolle ved observasjon			x			x		http://red.ndla.no/nb/node/173684?fag=52					YF VG2	Kjernestoff"}
+        );
+        Entity entity1 = parser.next();
+        Entity entity2 = parser.next();
+        assertTrue(entity2.shouldSetPrimary);
+        assertFalse(entity1.shouldSetPrimary);
+    }
+
     private void init(String[] lines) {
         String[] header = new String[]{"Klar for import\tHovedemne\tEmneområde\tEmne\tTittelen på ressursen\tOversettelse (ikke påkrevd)\t\t\tFilter 1\t\tFilter 2\t\tFilter 3\t\tFilter 4\t\tFilter 5\t\tFilter 6\t\tFilter 7",
                 "Import\tEmne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tnn\tLenke til gammelt system\tRessurstype\tSubressurstype\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans"};

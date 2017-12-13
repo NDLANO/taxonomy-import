@@ -125,6 +125,16 @@ public class TaxonomyRestClient {
         return restTemplate.postForLocation(urlBase + "/v1/topic-subtopics", cmd);
     }
 
+
+    public URI addTopicSubtopic(URI topicId, URI subtopicId, int rank, boolean shouldSetPrimary) {
+        AddSubtopicToTopicCommand cmd = new AddSubtopicToTopicCommand();
+        cmd.topicid = topicId;
+        cmd.subtopicid = subtopicId;
+        cmd.rank = rank;
+        cmd.primary = shouldSetPrimary;
+        return restTemplate.postForLocation(urlBase + "/v1/topic-subtopics", cmd);
+    }
+
     public URI createResource(URI id, String name, URI contentUri) {
         CreateResourceCommand cmd = new CreateResourceCommand();
         cmd.id = id;
@@ -139,6 +149,16 @@ public class TaxonomyRestClient {
         cmd.resourceid = resourceId;
         cmd.topicid = topicId;
         cmd.rank = rank;
+
+        return restTemplate.postForLocation(urlBase + "/v1/topic-resources", cmd);
+    }
+
+    public URI addTopicResource(URI topicId, URI resourceId, int rank, boolean primary) {
+        AddResourceToTopicCommand cmd = new AddResourceToTopicCommand();
+        cmd.resourceid = resourceId;
+        cmd.topicid = topicId;
+        cmd.rank = rank;
+        cmd.primary = primary;
 
         return restTemplate.postForLocation(urlBase + "/v1/topic-resources", cmd);
     }

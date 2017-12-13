@@ -252,4 +252,38 @@ public class ImportResourceTest extends ImporterTest {
         ResourceIndexDocument topic = restTemplate.getForObject(baseUrl + "/v1/resources/urn:resource:1:12345", ResourceIndexDocument.class);
         assertEquals(command.contentUri, topic.contentUri);
     }
+
+
+    @Test
+    public void can_set_primary_explicitely() {
+        Entity topic1 = new Entity() {{
+            type = "Topic";
+            name = "Mathematics";
+            id = URI.create("urn:topic:111");
+        }};
+
+        importer.doImport(topic1);
+
+        Entity resource = new Entity() {{
+            type = "Resource";
+            name = "Geometri";
+            id = URI.create("urn:resource:112");
+            parent = topic1;
+        }};
+        importer.doImport(resource);
+
+        Entity topic2 = new Entity() {{
+            type = "Topic";
+            name = "Shapes";
+            id = URI.create("urn:topic:112");
+        }};
+        importer.doImport(topic2);
+
+        resource.shouldSetPrimary = true;
+        resource.parent = topic2;
+        importer.doImport(resource);
+
+        TopicResourceIndexDocument[] topicResources = restTemplate.getForObject(baseUrl + "/v1/topic-resources", TopicResourceIndexDocument[].class);
+        assertAnyTrue(topicResources, tr -> tr.topicid.equals(topic2.id) && tr.resourceid.equals(resource.id) && tr.primary);
+    }
 }

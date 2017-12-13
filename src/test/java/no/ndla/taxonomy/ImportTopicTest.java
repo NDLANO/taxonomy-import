@@ -9,6 +9,7 @@ import java.net.URI;
 import static no.ndla.taxonomy.TestUtils.assertAnyTrue;
 import static no.ndla.taxonomy.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ImportTopicTest extends ImporterTest {
     @Test
@@ -125,16 +126,16 @@ public class ImportTopicTest extends ImporterTest {
         }};
         importer.doImport(parentEntity);
 
-        Entity topicEntity = new Entity() {{
+        Entity topicRank1 = new Entity() {{
             type = "Topic";
             name = "Trigonometri";
             id = URI.create("urn:topic:3");
             parent = parentEntity;
             rank = 1;
         }};
-        importer.doImport(topicEntity);
+        importer.doImport(topicRank1);
 
-        Entity subtopic = new Entity() {{
+        Entity topicRank2 = new Entity() {{
             type = "Topic";
             name = "Shapes";
             id = URI.create("urn:topic:4");
@@ -142,11 +143,53 @@ public class ImportTopicTest extends ImporterTest {
             rank = 2;
         }};
 
+        importer.doImport(topicRank2);
+
+        TopicIndexDocument[] topics = restTemplate.getForObject(baseUrl + "/v1/subjects/urn:subject:1/topics?recursive=true", TopicIndexDocument[].class);
+        assertEquals(parentEntity.id, topics[0].id);
+        assertEquals(topicRank1.id, topics[1].id);
+        assertEquals(topicRank2.id, topics[2].id);
+    }
+
+    @Test
+    public void can_set_primary_explicitely() {
+        Entity subject = new Entity() {{
+            type = "Subject";
+            name = "Mathematics";
+            id = URI.create("urn:subject:11");
+        }};
+
+        importer.doImport(subject);
+
+        Entity parentEntity = new Entity() {{
+            type = "Topic";
+            name = "Geometri";
+            id = URI.create("urn:topic:22");
+            parent = subject;
+        }};
+        importer.doImport(parentEntity);
+
+        Entity subtopic = new Entity() {{
+            type = "Topic";
+            name = "Shapes";
+            id = URI.create("urn:topic:33");
+            parent = parentEntity;
+        }};
         importer.doImport(subtopic);
 
-        TopicSubtopicIndexDocument[] topicSubtopics = restTemplate.getForObject(baseUrl + "/v1/subjects/urn:subject:1/topics?recursive=true", TopicSubtopicIndexDocument[].class);
-        assertEquals(parentEntity.id, topicSubtopics[0].id);
-        assertEquals(topicEntity.id, topicSubtopics[1].id);
-        assertEquals(subtopic.id, topicSubtopics[2].id);
+        Entity parent2 = new Entity() {{
+            type = "Topic";
+            name = "Statistikk";
+            id = URI.create("urn:topic:44");
+            parent = subject;
+        }};
+        importer.doImport(parent2);
+
+        subtopic.shouldSetPrimary = true;
+        subtopic.parent = parent2;
+        importer.doImport(subtopic);
+
+        TopicSubtopicIndexDocument[] topicSubtopics = restTemplate.getForObject(baseUrl + "/v1/topic-subtopics", TopicSubtopicIndexDocument[].class);
+        assertAnyTrue(topicSubtopics, ts -> ts.subtopicid.equals(subtopic.id) && ts.topicid.equals(parent2.id) && ts.primary);
     }
 }
