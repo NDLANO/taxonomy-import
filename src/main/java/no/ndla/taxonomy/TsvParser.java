@@ -328,11 +328,13 @@ public class TsvParser implements Iterator<Entity> {
     private void assertValidResourceType(String resourceType, String subresourceType) {
 
         if (isNotBlank(resourceType)) {
+            resourceType = resourceType.trim();
             if (resourceTypes.get(resourceType) == null) {
                 throw new MissingParameterException("Unknown resource type: " + resourceType, lines.getLineNumber());
             }
         }
         if (isNotBlank(subresourceType)) {
+            subresourceType = subresourceType.trim();
             if (resourceTypes.get(subresourceType) == null) {
                 throw new MissingParameterException("Unknown resource type: " + subresourceType, lines.getLineNumber());
             }

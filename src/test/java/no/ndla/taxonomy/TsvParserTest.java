@@ -510,6 +510,13 @@ public class TsvParserTest {
         assertFalse(entity1.shouldSetPrimary);
     }
 
+    @Test
+    public void can_read_simulation_with_spaces() {
+        init("Import\tEmne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\trevidert?\tPublisert\tKvalitetssikring\tLenke til gammelt system\tRessurstype\tSubressurstype\tFlere ressurstyper? (x)\tHvilke andre ressurstyper?\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans",
+                new String[] {"x\t\t\t\tNyhetsdrama på E18\t\t\t\thttp://red.ndla.no/node/103442\tOppgaver og aktiviteter\tSimulering \t\t\tMIK 1\tKjernestoff"});
+        Entity entity = parser.next();
+    }
+
     private void init(String[] lines) {
         String[] header = new String[]{"Klar for import\tHovedemne\tEmneområde\tEmne\tTittelen på ressursen\tOversettelse (ikke påkrevd)\t\t\tFilter 1\t\tFilter 2\t\tFilter 3\t\tFilter 4\t\tFilter 5\t\tFilter 6\t\tFilter 7",
                 "Import\tEmne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tnn\tLenke til gammelt system\tRessurstype\tSubressurstype\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans\tFilter\tRelevans"};
