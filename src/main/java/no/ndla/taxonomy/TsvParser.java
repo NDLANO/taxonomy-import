@@ -316,7 +316,7 @@ public class TsvParser implements Iterator<Entity> {
             subresourceType = subresourceType.trim();
             result.resourceTypes.add(resourceTypes.get(resourceTypes.get(subresourceType).parentName));
             result.resourceTypes.add(resourceTypes.get(subresourceType));
-            System.out.println("Adding rt " + subresourceType + "w parent: " + resourceTypes.get(subresourceType).parentName);
+            System.out.println("Adding rt " + subresourceType + " with parent: " + resourceTypes.get(subresourceType).parentName);
         } else {
             resourceType = resourceType.trim();
             result.resourceTypes.add(resourceTypes.get(resourceType));
