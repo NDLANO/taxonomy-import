@@ -9,7 +9,7 @@ public class AddResourceToTopicCommand {
     public URI topicid;
 
     @JsonProperty
-    public URI resourceid;
+    public URI resourceId;
 
     @JsonProperty
     public boolean primary;

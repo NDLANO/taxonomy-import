@@ -146,7 +146,7 @@ public class TaxonomyRestClient {
 
     public URI addTopicResource(URI topicId, URI resourceId, int rank) {
         AddResourceToTopicCommand cmd = new AddResourceToTopicCommand();
-        cmd.resourceid = resourceId;
+        cmd.resourceId = resourceId;
         cmd.topicid = topicId;
         cmd.rank = rank;
 
@@ -155,7 +155,7 @@ public class TaxonomyRestClient {
 
     public URI addTopicResource(URI topicId, URI resourceId, int rank, boolean primary) {
         AddResourceToTopicCommand cmd = new AddResourceToTopicCommand();
-        cmd.resourceid = resourceId;
+        cmd.resourceId = resourceId;
         cmd.topicid = topicId;
         cmd.rank = rank;
         cmd.primary = primary;
