@@ -11,7 +11,7 @@ public class TopicResourceIndexDocument {
     public URI topicid;
 
     @JsonProperty
-    public URI resourceid;
+    public URI resourceId;
 
     @JsonProperty
     public URI id;
