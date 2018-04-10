@@ -39,9 +39,9 @@ import shutil
 #   Author: oystein.ovrebo@bouvet.no
 
 #   SET THESE VALUES before running - must point to existing folders
-input_folder = "ndla-spoling-input/"
-export_folder = "ndla-spoling-export/"
-fs_root = "/mnt/c/"
+input_folder = "2018-04/"
+export_folder = "2018-04/ndla-spoling-export/"
+fs_root = "/Users/kjetil.hamre/Documents/"
 
 jar_location = "target/taxonomy-import.jar"
 
@@ -59,6 +59,8 @@ servers = [
 ]
 
 # Maps short names to "pretty names" for subjects, ordered by ID
+
+
 subjects = [
     ("medieuttrykk", "Medieuttrykk og mediesamfunnet"),
     ("kinesisk", "Kinesisk"),
@@ -68,16 +70,22 @@ subjects = [
     ("brønnteknikk", "Brønnteknikk"),
     ("markedsføring-og-ledelse", "Markedsføring og ledelse 1"),
     ("tysk", "Tysk"),
-    ("historie", "Historie vg2 og vg3"),
+    ("historie", "Historie Vg2 og Vg3"),
     ("matematikk-fellesfag", "Matematikk fellesfag"),
     ("bygg-og-anleggsteknikk", "Bygg- og anleggsteknikk"),
-    ("service-og-samferdsel", "Service og samferdsel vg1"),
+    ("service-og-samferdsel", "Service og samferdsel Vg1"),
     ("naturbruk", "Naturbruk vg 1"),
     ("medie-og-informasjonskunnskap", "Medie- og informasjonskunnskap"),
     ("sør-samisk", "Sørsamisk vg1 og vg2"),
     ("elektrofag", "Elektrofag vg1"),
     ("engelskspråklig-litteratur-og-kultur", "Engelskspråklig litteratur og kultur"),
-    ("kommunikasjon-og-kultur", "Kommunikasjon og kultur 1, 2, 3")
+    ("kommunikasjon-og-kultur", "Kommunikasjon og kultur Vg1, Vg2, Vg3"),
+    ("norsk", "Norsk"),
+    ("film", "Film"),
+    ("naturfag", "Naturfag"),
+    ("salg-service-sikkerhet", "Salg, service og sikkerhet Vg2"),
+    ("samfunnsfaglig-engelsk", "Samfunnsfaglig engelsk"),
+    ("helse-og-oppvekst", "Helse- og oppvekstfag Vg1")
 ]
 
 
@@ -88,7 +96,7 @@ def make_filename(id):
 
 def copy_renamed_input_files():
     current_dir = os.getcwd()
-    os.chdir(input_folder)
+    os.chdir(fs_root+input_folder)
     for file in glob.glob("*.tsv"):
         end_index = file.find(".tsv")
         name = file[:end_index]
@@ -113,7 +121,7 @@ def create_shell_scripts():
                 logfile = '{}{}-{}-{}-{}.log'.format(path, id, subject[0], date, server[0])
                 environment = server[1]
                 script.write(
-                    "cat {} | {} -i {} -n {} -e {} > {}\n".format(input_file, jar_location, subject_id, subject_name,
+                    "cat {} | {} -i {} -n {} -e {} &> {}\n".format(input_file, jar_location, subject_id, subject_name,
                                                                   environment, logfile))
             script.close()
 

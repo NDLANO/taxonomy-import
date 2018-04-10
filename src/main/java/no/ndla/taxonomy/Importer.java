@@ -92,6 +92,7 @@ public class Importer {
                 }
             }
         } catch (Exception e) {
+            System.out.println("entity failed: " + entity.id);
             e.printStackTrace();
         }
     }

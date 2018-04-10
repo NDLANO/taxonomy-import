@@ -72,15 +72,16 @@ public class ImportResourceTest extends ImporterTest {
             id = URI.create("urn:topic:3");
         }};
 
+        importer.doImport(parentEntity2);
+
         entity.parent = parentEntity2;
 
-        importer.doImport(parentEntity2);
         importer.doImport(entity);
 
         TopicResourceIndexDocument[] topicResources = restTemplate.getForObject(baseUrl + "/v1/topic-resources/", TopicResourceIndexDocument[].class);
         assertTrue(2 <= topicResources.length);
-        assertAnyTrue(topicResources, tr -> tr.topicid.equals(parentEntity.id) && tr.resourceid.equals(entity.id));
-        assertAnyTrue(topicResources, tr -> tr.topicid.equals(parentEntity2.id) && tr.resourceid.equals(entity.id));
+        assertAnyTrue(topicResources, tr -> tr.topicid.equals(parentEntity.id) && tr.resourceId.equals(entity.id));
+        assertAnyTrue(topicResources, tr -> tr.topicid.equals(parentEntity2.id) && tr.resourceId.equals(entity.id));
 
     }
 
@@ -284,6 +285,6 @@ public class ImportResourceTest extends ImporterTest {
         importer.doImport(resource);
 
         TopicResourceIndexDocument[] topicResources = restTemplate.getForObject(baseUrl + "/v1/topic-resources", TopicResourceIndexDocument[].class);
-        assertAnyTrue(topicResources, tr -> tr.topicid.equals(topic2.id) && tr.resourceid.equals(resource.id) && tr.primary);
+        assertAnyTrue(topicResources, tr -> tr.topicid.equals(topic2.id) && tr.resourceId.equals(resource.id) && tr.primary);
     }
 }
