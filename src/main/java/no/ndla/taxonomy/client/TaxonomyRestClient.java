@@ -18,6 +18,7 @@ import no.ndla.taxonomy.client.subjects.CreateSubjectCommand;
 import no.ndla.taxonomy.client.subjects.FilterIndexDocument;
 import no.ndla.taxonomy.client.subjects.SubjectIndexDocument;
 import no.ndla.taxonomy.client.subjects.UpdateSubjectCommand;
+import no.ndla.taxonomy.client.topicFilters.AddFilterToTopicCommand;
 import no.ndla.taxonomy.client.topicResources.AddResourceToTopicCommand;
 import no.ndla.taxonomy.client.topicResources.TopicResourceIndexDocument;
 import no.ndla.taxonomy.client.topicResources.UpdateTopicResourceCommand;
@@ -163,6 +164,14 @@ public class TaxonomyRestClient {
         return restTemplate.postForLocation(urlBase + "/v1/topic-resources", cmd);
     }
 
+    public URI addTopicFilter(URI topicId, URI filterId, URI relevanceId) {
+        AddFilterToTopicCommand cmd = new AddFilterToTopicCommand();
+        cmd.filterId = filterId;
+        cmd.topicId = topicId;
+        cmd.relevanceId = relevanceId;
+        return restTemplate.postForLocation(urlBase + "/v1/topic-filters", cmd);
+    }
+
     public ResourceIndexDocument getResource(URI id) {
         String url = urlBase + "/v1/resources/" + id;
         return restTemplate.getForObject(url, ResourceIndexDocument.class);
@@ -206,6 +215,11 @@ public class TaxonomyRestClient {
 
     public no.ndla.taxonomy.client.resources.FilterIndexDocument[] getFiltersForResource(URI resourceId) {
         String url = urlBase + "/v1/resources/" + resourceId + "/filters";
+        return restTemplate.getForObject(url, no.ndla.taxonomy.client.resources.FilterIndexDocument[].class);
+    }
+
+    public no.ndla.taxonomy.client.resources.FilterIndexDocument[] getFiltersForTopic(URI topicId) {
+        String url = urlBase + "/v1/topics/" + topicId + "/filters";
         return restTemplate.getForObject(url, no.ndla.taxonomy.client.resources.FilterIndexDocument[].class);
     }
 

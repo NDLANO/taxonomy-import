@@ -160,17 +160,17 @@ public class Importer {
             System.out.println("Updated resource: " + entity.id);
             //get rts for resource, check if replace should be done
             updateResourceResourceTypeConnections(entity);
-            updateFilters(entity);
+            updateFiltersForResource(entity);
             return location;
         } catch (Exception e) {
             System.out.println("Creating resource: " + entity.id + " with nodeId: " + entity.nodeId);
             URI resourceURI = createResource(entity);
-            updateFilters(entity);
+            updateFiltersForResource(entity);
             return resourceURI;
         }
     }
 
-    private void updateFilters(Entity entity) {
+    private void updateFiltersForResource(Entity entity) {
         Entity subject = getSubject(entity);
 
         List<FilterIndexDocument> currentFilters = Arrays.asList(restClient.getFiltersForResource(entity.id));
@@ -183,11 +183,30 @@ public class Importer {
         }
     }
 
+    private void updateFiltersForTopic(Entity entity) {
+        Entity subject = getSubject(entity);
+        List<FilterIndexDocument> currentFilters = Arrays.asList(restClient.getFiltersForTopic(entity.id));
+
+        for (Filter filter : entity.filters) {
+            if (currentFilters.stream().noneMatch(f -> f.name.equalsIgnoreCase(filter.name))) {
+                addFilterToTopic(entity.id, filter, subject.id);
+                System.out.println("Added filter topic connection: " + filter.name);
+            }
+        }
+    }
+
     private void addFilterToResource(URI resourceId, Filter filter, URI subjectId) {
         URI filterId = getOrCreateFilterId(filter, subjectId);
         URI relevanceId = getOrCreateRelevanceId(filter.relevance);
         restClient.addResourceFilter(resourceId, filterId, relevanceId);
     }
+
+    private void addFilterToTopic(URI topicId, Filter filter, URI subjectId) {
+        URI filterId = getOrCreateFilterId(filter, subjectId);
+        URI relevanceId = getOrCreateRelevanceId(filter.relevance);
+        restClient.addTopicFilter(topicId, filterId, relevanceId);
+    }
+
 
     private URI getOrCreateRelevanceId(Relevance relevance) {
         updateRelevanceCache();
@@ -364,6 +383,7 @@ public class Importer {
                 location = restClient.createTopic(entity.id, entity.name, entity.contentUri);
             }
         }
+        updateFiltersForTopic(entity);
         return location;
     }
 

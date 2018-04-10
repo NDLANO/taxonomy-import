@@ -26,6 +26,12 @@ public class ImportFilterTest extends ImporterTest {
             name = "Algebra";
             id = URI.create("urn:topic:10");
             parent = subject;
+            filters.add(new Filter() {{
+                name = "VG1";
+                relevance = new Relevance() {{
+                    name = Importer.TILLEGGSSSTOFF;
+                }};
+            }});
         }};
 
         Entity resource = new Entity() {{
@@ -70,5 +76,13 @@ public class ImportFilterTest extends ImporterTest {
         assertEquals(2, subjectFilters.length);
         assertAnyTrue(subjectFilters, f -> "VG1".equals(f.name));
         assertAnyTrue(subjectFilters, f -> "VG2".equals(f.name));
+
+        //filters should be added to topic
+        no.ndla.taxonomy.client.subjects.FilterIndexDocument[] topicFilters = restTemplate.getForObject(baseUrl + "/v1/topics/" + topic.id + "/filters", no.ndla.taxonomy.client.subjects.FilterIndexDocument[].class);
+        assertEquals(1, topicFilters.length);
+        assertAnyTrue(topicFilters, f -> "VG1".equals(f.name));
+
+
+
     }
 }
