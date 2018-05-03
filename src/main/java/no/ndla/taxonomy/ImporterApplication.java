@@ -61,12 +61,11 @@ public class ImporterApplication {
     private void run(Importer importer) throws Exception {
         TsvParser.StringIterator iterator = new InputStreamStringIterator(System.in);
 
-        Entity subject = new Entity() {{
-            id = URI.create(subjectId);
-            name = subjectName;
-            type = "Subject";
-        }};
-
+        Entity subject = new Entity.Builder()
+                .id(URI.create(subjectId))
+                .name(subjectName)
+                .type("Subject")
+                .build();
         importer.doImport(subject);
 
         Iterator<Entity> entities = new TsvParser(iterator, subject);

@@ -9,12 +9,10 @@ import no.ndla.taxonomy.client.subjectTopics.SubjectTopicIndexDocument;
 import no.ndla.taxonomy.client.subjects.TopicIndexDocument;
 import no.ndla.taxonomy.client.topicResources.TopicResourceIndexDocument;
 import no.ndla.taxonomy.client.topicSubtopics.TopicSubtopicIndexDocument;
+import no.ndla.taxonomy.client.topics.SubtopicIndexDocument;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
@@ -46,7 +44,7 @@ public class Importer {
 
         URI location = importEntity(entity);
         System.out.println("Entity imported: " + entity.nodeId);
-        entity.id = getId(location);
+        entity.setId(getId(location).toString());
 
         if (entity.parent != null && entity.parent.type.equals(SUBJECT_TYPE) && entity.type.equals(TOPIC_TYPE)) {
             importSubjectTopic(entity);
@@ -69,30 +67,24 @@ public class Importer {
     private void importTopicResource(Entity entity) {
         try {
             boolean currentTopicConnectionFound = false;
-            no.ndla.taxonomy.client.topics.ResourceIndexDocument[] resourcesForTopic = restClient.getResourcesForTopic(entity.parent.id);
+            no.ndla.taxonomy.client.topics.ResourceIndexDocument[] resourcesForTopic = restClient.getResourcesForTopic(entity.parent.getId());
             for (no.ndla.taxonomy.client.topics.ResourceIndexDocument resource : resourcesForTopic) {
-                if (resource.id.equals(entity.id)) {
+                if (resource.id.equals(entity.getId())) {
                     TopicResourceIndexDocument topicResource = restClient.getTopicResource(resource.connectionId);
-                    System.out.println("Updating topic resource for resource: " + entity.id);
+                    System.out.println("Updating topic resource for resource: " + entity.getId());
                     topicResource.rank = entity.rank;
-                    topicResource.topicid = entity.parent.id;
-                    if (entity.parent.id.equals(topicResource.topicid) && entity.shouldSetPrimary) {
-                        topicResource.primary = true;
-                    }
+                    topicResource.topicid = entity.parent.getId();
+                    topicResource.primary = entity.isPrimary;
                     restClient.updateTopicResource(topicResource);
-                    currentTopicConnectionFound = topicResource.topicid.equals(entity.parent.id);
+                    currentTopicConnectionFound = topicResource.topicid.equals(entity.parent.getId());
                 }
             }
             if (!currentTopicConnectionFound) {
-                System.out.println("Adding topic resource for: " + entity.id);
-                if (entity.shouldSetPrimary) {
-                    restClient.addTopicResource(entity.parent.id, entity.id, entity.rank, true);
-                } else {
-                    restClient.addTopicResource(entity.parent.id, entity.id, entity.rank);
-                }
+                System.out.println("Adding topic resource for: " + entity.getId());
+                restClient.addTopicResource(entity.parent.getId(), entity.getId(), entity.rank, entity.isPrimary);
             }
         } catch (Exception e) {
-            System.out.println("entity failed: " + entity.id);
+            System.out.println("entity failed: " + entity.getId());
             e.printStackTrace();
         }
     }
@@ -101,29 +93,23 @@ public class Importer {
         try {
             boolean hasFoundCurrentTopicConnection = false;
             if (currentSubject != null) {
-                TopicIndexDocument[] topicsForSubject = restClient.getTopicsForSubject(currentSubject.id);
+                TopicIndexDocument[] topicsForSubject = restClient.getTopicsForSubject(currentSubject.getId());
                 for (TopicIndexDocument topic : topicsForSubject) {
-                    if (topic.id.equals(entity.id)) {
+                    if (topic.id.equals(entity.getId())) {
                         TopicSubtopicIndexDocument topicSubtopic = restClient.getTopicSubtopic(topic.connectionId);
-                        System.out.println("Updating topic subtopic connection for topic: " + entity.id + " with rank " + entity.rank);
+                        System.out.println("Updating topic subtopic connection for topic: " + entity.getId() + " with rank " + entity.rank);
                         topicSubtopic.rank = entity.rank;
-                        if (entity.parent.id.equals(topicSubtopic.topicid) && entity.shouldSetPrimary) {
-                            topicSubtopic.primary = true;
-                        }
+                        topicSubtopic.primary = entity.isPrimary;
                         restClient.updateTopicSubtopic(topicSubtopic);
                         if (!hasFoundCurrentTopicConnection) {
-                            hasFoundCurrentTopicConnection = topicSubtopic.topicid.equals(entity.parent.id);
+                            hasFoundCurrentTopicConnection = topicSubtopic.topicid.equals(entity.parent.getId());
                         }
                     }
                 }
             }
             if (!hasFoundCurrentTopicConnection) {
-                System.out.println("Adding topic subtopics connection for topic: " + entity.id + " with rank " + entity.rank);
-                if (entity.shouldSetPrimary) {
-                    restClient.addTopicSubtopic(entity.parent.id, entity.id, entity.rank, true);
-                } else {
-                    restClient.addTopicSubtopic(entity.parent.id, entity.id, entity.rank);
-                }
+                System.out.println("Adding topic subtopics connection for topic: " + entity.getId() + " with rank " + entity.rank);
+                restClient.addTopicSubtopic(entity.parent.getId(), entity.getId(), entity.rank, entity.isPrimary);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -142,10 +128,10 @@ public class Importer {
     }
 
     private URI importResource(Entity entity) {
-        if (null == entity.id) {
+        if (null == entity.getId()) {
             if (isNotEmpty(entity.nodeId)) {
                 try {
-                    entity.id = URI.create("urn:resource:1:" + entity.nodeId);
+                    entity.setId("urn:resource:1:" + entity.nodeId);
                 } catch (Exception e) {
                     System.out.println("Error creating ID for entity " + entity.name + " with nodeid: '" + entity.nodeId + "': " + e.getMessage() + " Skipping.");
                 }
@@ -156,15 +142,15 @@ public class Importer {
         }
 
         try {
-            ResourceIndexDocument resource = restClient.getResource(entity.id);
+            ResourceIndexDocument resource = restClient.getResource(entity.getId());
             URI location = updateResource(entity, resource);
-            System.out.println("Updated resource: " + entity.id);
+            System.out.println("Updated resource: " + entity.getId());
             //get rts for resource, check if replace should be done
             updateResourceResourceTypeConnections(entity);
             updateFiltersForResource(entity);
             return location;
         } catch (Exception e) {
-            System.out.println("Creating resource: " + entity.id + " with nodeId: " + entity.nodeId);
+            System.out.println("Creating resource: " + entity.getId() + " with nodeId: " + entity.nodeId);
             URI resourceURI = createResource(entity);
             updateFiltersForResource(entity);
             return resourceURI;
@@ -174,11 +160,11 @@ public class Importer {
     private void updateFiltersForResource(Entity entity) {
         Entity subject = getSubject(entity);
 
-        List<FilterIndexDocument> currentFilters = Arrays.asList(restClient.getFiltersForResource(entity.id));
+        List<FilterIndexDocument> currentFilters = Arrays.asList(restClient.getFiltersForResource(entity.getId()));
 
         for (Filter filter : entity.filters) {
             if (currentFilters.stream().noneMatch(f -> f.name.equalsIgnoreCase(filter.name))) {
-                addFilterToResource(entity.id, filter, subject.id);
+                addFilterToResource(entity.getId(), filter, subject.getId());
                 System.out.println("Added filter resource connection: " + filter.name);
             }
         }
@@ -186,11 +172,11 @@ public class Importer {
 
     private void updateFiltersForTopic(Entity entity) {
         Entity subject = getSubject(entity);
-        List<FilterIndexDocument> currentFilters = Arrays.asList(restClient.getFiltersForTopic(entity.id));
+        List<FilterIndexDocument> currentFilters = Arrays.asList(restClient.getFiltersForTopic(entity.getId()));
 
         for (Filter filter : entity.filters) {
             if (currentFilters.stream().noneMatch(f -> f.name.equalsIgnoreCase(filter.name))) {
-                addFilterToTopic(entity.id, filter, subject.id);
+                addFilterToTopic(entity.getId(), filter, subject.getId());
                 System.out.println("Added filter topic connection: " + filter.name);
             }
         }
@@ -265,11 +251,11 @@ public class Importer {
     }
 
     private void updateResourceResourceTypeConnections(Entity entity) {
-        List<ResourceTypeIndexDocument> currentResourceTypes = Arrays.asList(restClient.getResourceTypesForResource(entity.id));
+        List<ResourceTypeIndexDocument> currentResourceTypes = Arrays.asList(restClient.getResourceTypesForResource(entity.getId()));
 
         for (ResourceType resourceType : entity.resourceTypes) {
             if (currentResourceTypes.stream().noneMatch(rt -> rt.name.equalsIgnoreCase(resourceType.name))) {
-                addResourceTypeToResource(entity.id, resourceType);
+                addResourceTypeToResource(entity.getId(), resourceType);
                 System.out.println("Importing resource resource type connection: " + resourceType.name);
             }
         }
@@ -288,19 +274,19 @@ public class Importer {
     private URI updateResource(Entity entity, ResourceIndexDocument resource) {
         if (entity.contentUri == null) entity.contentUri = resource.contentUri;
         if (entity.name == null) entity.name = resource.name;
-        URI location = restClient.updateEntity(entity.id, entity.name, entity.contentUri, RESOURCE_TYPE);
+        URI location = restClient.updateEntity(entity.getId(), entity.name, entity.contentUri, RESOURCE_TYPE);
 
-        ResourceTypeIndexDocument[] resourceTypesForResource = restClient.getResourceTypesForResource(entity.id);
-        if (resourceTypesForResource.length == 0) addResourceTypesToResource(entity.id, entity.resourceTypes);
+        ResourceTypeIndexDocument[] resourceTypesForResource = restClient.getResourceTypesForResource(entity.getId());
+        if (resourceTypesForResource.length == 0) addResourceTypesToResource(entity.getId(), entity.resourceTypes);
 
         return location;
     }
 
     private URI createResource(Entity entity) {
-        URI location = restClient.createResource(entity.id, entity.name, entity.contentUri);
-        entity.id = getId(location);
-        System.out.println("Added resource: " + entity.id);
-        addResourceTypesToResource(entity.id, entity.resourceTypes);
+        URI location = restClient.createResource(entity.getId(), entity.name, entity.contentUri);
+        entity.setId(getId(location).toString());
+        System.out.println("Added resource: " + entity.getId());
+        addResourceTypesToResource(entity.getId(), entity.resourceTypes);
         return location;
     }
 
@@ -344,18 +330,18 @@ public class Importer {
 
     private void importSubjectTopic(Entity entity) {
         try {
-            TopicIndexDocument[] topicsForSubject = restClient.getTopicsForSubject(entity.parent.id);
+            TopicIndexDocument[] topicsForSubject = restClient.getTopicsForSubject(entity.parent.getId());
             for (TopicIndexDocument topic : topicsForSubject) {
-                if (topic.id.equals(entity.id)) {
+                if (topic.id.equals(entity.getId())) {
                     SubjectTopicIndexDocument subjectTopic = restClient.getSubjectTopic(topic.connectionId);
                     subjectTopic.rank = entity.rank;
-                    System.out.println("Updating subject topic for topic: " + entity.id);
+                    System.out.println("Updating subject topic for topic: " + entity.getId());
                     restClient.updateSubjectTopic(subjectTopic);
                     return;
                 }
             }
-            System.out.println("Adding topic " + entity.id + " to subject " + entity.parent.id);
-            restClient.addSubjectTopic(entity.parent.id, entity.id, entity.rank);
+            System.out.println("Adding topic " + entity.getId() + " to subject " + entity.parent.getId());
+            restClient.addSubjectTopic(entity.parent.getId(), entity.getId(), entity.rank);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -364,24 +350,24 @@ public class Importer {
     private URI importTopic(Entity entity) {
         URI location;
         try {
-            restClient.getTopic(entity.id);
+            restClient.getTopic(entity.getId());
             System.out.println("Importing topic");
-            location = restClient.updateEntity(entity.id, entity.name, entity.contentUri, TOPIC_TYPE);
-            System.out.println("Updated topic: " + entity.id);
+            location = restClient.updateEntity(entity.getId(), entity.name, entity.contentUri, TOPIC_TYPE);
+            System.out.println("Updated topic: " + entity.getId());
         } catch (Exception e) {
-            if (entity.nodeId != null && entity.id == null) {
-                entity.id = URI.create("urn:topic:1:" + entity.nodeId);
+            if (entity.nodeId != null && entity.getId() == null) {
+                entity.setId("urn:topic:1:" + entity.nodeId);
                 try {
-                    restClient.getTopic(entity.id);
-                    System.out.println("Updating topic: " + entity.id);
-                    location = restClient.updateEntity(entity.id, entity.name, entity.contentUri, TOPIC_TYPE);
+                    restClient.getTopic(entity.getId());
+                    System.out.println("Updating topic: " + entity.getId());
+                    location = restClient.updateEntity(entity.getId(), entity.name, entity.contentUri, TOPIC_TYPE);
                 } catch (Exception ex) {
-                    System.out.println("Creating topic: " + entity.id);
-                    location = restClient.createTopic(entity.id, entity.name, entity.contentUri);
+                    System.out.println("Creating topic: " + entity.getId());
+                    location = restClient.createTopic(entity.getId(), entity.name, entity.contentUri);
                 }
             } else {
-                System.out.println("Creating topic: " + entity.id);
-                location = restClient.createTopic(entity.id, entity.name, entity.contentUri);
+                System.out.println("Creating topic: " + entity.getId());
+                location = restClient.createTopic(entity.getId(), entity.name, entity.contentUri);
             }
         }
         updateFiltersForTopic(entity);
@@ -392,12 +378,12 @@ public class Importer {
         URI location;
 
         try {
-            restClient.getSubject(entity.id);
-            System.out.println("Updating subject: " + entity.id);
-            location = restClient.updateEntity(entity.id, entity.name, entity.contentUri, SUBJECT_TYPE);
+            restClient.getSubject(entity.getId());
+            System.out.println("Updating subject: " + entity.getId());
+            location = restClient.updateEntity(entity.getId(), entity.name, entity.contentUri, SUBJECT_TYPE);
         } catch (Exception e) {
-            System.out.println("Creating subject: " + entity.id + " with name " + entity.name);
-            location = restClient.createSubject(entity.id, entity.name, entity.contentUri);
+            System.out.println("Creating subject: " + entity.getId() + " with name " + entity.name);
+            location = restClient.createSubject(entity.getId(), entity.name, entity.contentUri);
         }
         return location;
     }
@@ -406,4 +392,65 @@ public class Importer {
         restClient.setNoBatchMode();
         doImport(entity);
     }
+
+    public List<Entity> listResourcesAndTopicsForSubjects(URI subjectUri) {
+        List<Entity> resultList = new ArrayList<>();
+        TopicIndexDocument[] topics = restClient.getTopicsForSubject(subjectUri, false);
+        for (TopicIndexDocument topic : topics) {
+            Entity topicEntity = new Entity.Builder()
+                    .type("Topic")
+                    .name(topic.name)
+                    .id(topic.id)
+                    .parent(null)
+                    .build();
+            resultList.add(topicEntity);
+            resultList.addAll(listResourcesAndTopics(topicEntity));
+            no.ndla.taxonomy.client.topics.ResourceIndexDocument[] resources = restClient.getResourcesForTopic(topic.id);
+            for (no.ndla.taxonomy.client.topics.ResourceIndexDocument resource : resources) {
+                if (resource.isPrimary) {
+                    Entity resourceEntity = new Entity.Builder()
+                            .type("Resource")
+                            .name(resource.name)
+                            .id(resource.id)
+                            .isPrimary(resource.isPrimary)
+                            .build();
+                    resultList.add(resourceEntity);
+                }
+            }
+        }
+        return resultList;
+    }
+
+    public List<Entity> listResourcesAndTopics(Entity topicEntity) {
+        List<Entity> resultList = new ArrayList<>();
+        SubtopicIndexDocument[] topics = restClient.getSubtopicsForTopic(topicEntity.getId());
+        for (SubtopicIndexDocument topic : topics) {
+            Entity entity = new Entity.Builder()
+                    .type("Topic")
+                    .name(topic.name)
+                    .id(topic.id)
+                    .parent(topicEntity)
+                    .isPrimary(topic.isPrimary)
+                    .build();
+            resultList.add(entity);
+            if (topic.isPrimary) {
+                resultList.addAll(listResourcesAndTopics(entity));
+            }
+            no.ndla.taxonomy.client.topics.ResourceIndexDocument[] resources = restClient.getResourcesForTopic(topic.id);
+            for (no.ndla.taxonomy.client.topics.ResourceIndexDocument resource : resources) {
+                if (resource.isPrimary) {
+                    Entity resourceEntity = new Entity.Builder()
+                            .type("Resource")
+                            .name(resource.name)
+                            .id(resource.id)
+                            .isPrimary(resource.isPrimary)
+                            .build();
+                    resultList.add(resourceEntity);
+                }
+            }
+
+        }
+        return resultList;
+    }
+
 }

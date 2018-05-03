@@ -2,7 +2,6 @@ package no.ndla.taxonomy;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -21,15 +20,16 @@ public class TsvParserTest {
     Entity subject;
 
     @Before
-    public void setUp() throws Exception {
-        subject = new Entity() {{
-            name = "Matematikk";
-            id = URI.create("urn:subject:1");
-        }};
+    public void setUp() {
+        subject = new Entity.Builder()
+                .name("Matematikk")
+                .id(URI.create("urn:subject:1"))
+                .build()
+        ;
     }
 
     @Test
-    public void first_lines_contains_specification() throws Exception {
+    public void first_lines_contains_specification() {
         String[] lines = new String[]{
                 "Klar for import\tHovedemne\tEmneområde\tEmne\tTittelen på ressursen\tOversettelse (ikke påkrevd)\t\tFilter 1\t\tFilter 2\t\tFilter 3\t\tFilter 4\t\tFilter 5\t\tFilter 6\t\tFilter 7",
                 "Import\tEmne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tnn\tLenke til gammelt system\tRessurstype\tSubressurstype\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans",
@@ -122,7 +122,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void missing_name_not_allowed() throws Exception {
+    public void missing_name_not_allowed() {
         init("x\t\t\t\t\t\thttp://red.ndla.no/nb/node/165193?fag=161000\tFagstoff\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
         expectedException.expect(MissingParameterException.class);
         parser.next();
@@ -151,14 +151,14 @@ public class TsvParserTest {
     }
 
     @Test
-    public void can_have_translation() throws Exception {
+    public void can_have_translation() {
         init("x\tTall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\tFagstoff\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
         Entity entity = parser.next();
         assertEquals("Tal og algebra", entity.translations.get("nn").name);
     }
 
     @Test
-    public void can_get_nodeid_from_fagstoff_type_url() throws Exception {
+    public void can_get_nodeid_from_fagstoff_type_url() {
         init("x\tTall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\tFagstoff\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
 
         Entity entity = parser.next();
@@ -166,7 +166,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void can_get_nodeid_from_node_type_url() throws Exception {
+    public void can_get_nodeid_from_node_type_url() {
         init("x\t\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tFagstoff\t\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t");
 
         Entity entity = parser.next();
@@ -174,7 +174,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void can_get_nodeid_from_quiz_type_url() throws Exception {
+    public void can_get_nodeid_from_quiz_type_url() {
         init("x\t\t\t\tTallregning\t\thttp://red.ndla.no/nb/quiz/5960?fag=54\tOppgave\t\t1T-ST\tTilleggsstoff\t1T-YF\tTilleggsstoff\t\t\t\t\t\t\t\t\t");
 
         Entity entity = parser.next();
@@ -182,7 +182,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void can_get_nodeid_from_h5pcontent_type_url() throws Exception {
+    public void can_get_nodeid_from_h5pcontent_type_url() {
         init("x\t\t\t\tTallregning\t\thttp://red.ndla.no/nb/h5pcontent/125735?fag=54\tOppgave\t\t1T-ST\tKjernestoff\t1T-YF\tKjernestoff\t\t\t\t\t\t\t\t\t");
 
         Entity entity = parser.next();
@@ -190,7 +190,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void can_get_nodeid_from_incomplete_url() throws Exception {
+    public void can_get_nodeid_from_incomplete_url() {
         init("x\t\t\t\tTallregning\t\tred.ndla.no/nb/h5pcontent/125735?fag=54\tOppgave\t\t1T-ST\tKjernestoff\t1T-YF\tKjernestoff\t\t\t\t\t\t\t\t\t");
 
         Entity entity = parser.next();
@@ -198,23 +198,23 @@ public class TsvParserTest {
     }
 
     @Test
-    public void can_get_nodeid_from_verktoy_path_url() throws Exception {
+    public void can_get_nodeid_from_verktoy_path_url() {
         init("x\t\t\t\tTallregning\t\tverktoy/blikkenslageren\tOppgave\t\t1T-ST\tKjernestoff\t1T-YF\tKjernestoff\t\t\t\t\t\t\t\t\t");
         Entity entity = parser.next();
         assertEquals("verktoy:blikkenslageren", entity.nodeId);
     }
 
     @Test
-    public void level_one_topic_has_parent() throws Exception {
+    public void level_one_topic_has_parent() {
         init("x\tTall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t");
 
         Entity entity = parser.next();
 
-        assertEquals(subject.id, entity.parent.id);
+        assertEquals(subject.getId(), entity.parent.getId());
     }
 
     @Test
-    public void resource_can_have_level_one_topic_parent() throws Exception {
+    public void resource_can_have_level_one_topic_parent() {
         String[] lines = {
                 "x\tTall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
                 "x\t\t\t\tTall og algebra fasit YF	Tal og algebra fasit YF	http://red.ndla.no/nb/node/138016?fag=54	Fagstoff	\t1T-YF	Kjernestoff	1T-ST	Tilleggsstoff										"
@@ -225,11 +225,11 @@ public class TsvParserTest {
         topic.setId("urn:topic:1");
         Entity entity = parser.next();
 
-        assertEquals(topic.id, entity.parent.id);
+        assertEquals(topic.getId(), entity.parent.getId());
     }
 
     @Test
-    public void resource_can_have_level_two_topic_parent() throws Exception {
+    public void resource_can_have_level_two_topic_parent() {
         String[] lines = {
                 "x\tTall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
                 "x\t\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
@@ -243,11 +243,11 @@ public class TsvParserTest {
         levelTwo.setId("urn:topic:2");
         Entity result = parser.next();
 
-        assertEquals(levelTwo.id, result.parent.id);
+        assertEquals(levelTwo.getId(), result.parent.getId());
     }
 
     @Test
-    public void resource_can_have_level_three_topic_parent() throws Exception {
+    public void resource_can_have_level_three_topic_parent() {
         String[] lines = {
                 "x\tTall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
                 "x\t\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
@@ -264,11 +264,11 @@ public class TsvParserTest {
         levelThree.setId("urn:topic:3");
         Entity result = parser.next();
 
-        assertEquals(levelThree.id, result.parent.id);
+        assertEquals(levelThree.getId(), result.parent.getId());
     }
 
     @Test
-    public void top_level_topic_removes_subtopics_in_parent_hierarchy() throws Exception {
+    public void top_level_topic_removes_subtopics_in_parent_hierarchy() {
         String[] lines = {
                 "x\tTall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
                 "x\t\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
@@ -288,11 +288,11 @@ public class TsvParserTest {
         topic.setId("urn:topic:4");
         Entity result = parser.next();
 
-        assertEquals(topic.id, result.parent.id);
+        assertEquals(topic.getId(), result.parent.getId());
     }
 
     @Test
-    public void level_two_topic_removes_subtopics_in_parent_hierarchy() throws Exception {
+    public void level_two_topic_removes_subtopics_in_parent_hierarchy() {
         String[] lines = {
                 "x\tTall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
                 "x\t\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
@@ -312,11 +312,11 @@ public class TsvParserTest {
         levelTwo.setId("urn:topic:4");
         Entity result = parser.next();
 
-        assertEquals(levelTwo.id, result.parent.id);
+        assertEquals(levelTwo.getId(), result.parent.getId());
     }
 
     @Test
-    public void can_read_resource_type() throws Exception {
+    public void can_read_resource_type() {
         init("Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tLenke til gammelt system\tRessurstype\tSubressurstype",
                 new String[]{"\t\t\tIntroduksjon til algebra\thttp://red.ndla.no/nb/node/138014?fag=54\tFagstoff\t"});
         Entity entity = parser.next();
@@ -324,7 +324,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void unknown_resource_type_skips_resource() throws Exception {
+    public void unknown_resource_type_skips_resource() {
         init("Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tLenke til gammelt system\tRessurstype\tSubressurstype",
                 new String[]{"\t\t\tIntroduksjon til algebra\t\tUkjent\t"});
         Entity entity = parser.next();
@@ -332,7 +332,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void learning_path_is_top_level_resource_type() throws Exception {
+    public void learning_path_is_top_level_resource_type() {
         init("Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tLenke til gammelt system\tRessurstype\tSubressurstype",
                 new String[]{"\t\t\tIntroduksjon til algebra\thttp://red.ndla.no/nb/node/138014?fag=54\tLæringssti\t"});
         Entity entity = parser.next();
@@ -342,7 +342,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void sub_resource_type_gets_correct_parent_by_inference() throws Exception {
+    public void sub_resource_type_gets_correct_parent_by_inference() {
         init("Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tLenke til gammelt system\tRessurstype\tSubressurstype",
                 new String[]{"\t\t\tIntroduksjon til algebra\thttp://red.ndla.no/nb/node/138014?fag=54\tOppgaver og aktiviteter\tArbeidsoppdrag"});
         Entity entity = parser.next();
@@ -350,7 +350,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void parent_resource_type_is_listed_first() throws Exception {
+    public void parent_resource_type_is_listed_first() {
         init("Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tLenke til gammelt system\tRessurstype\tSubressurstype",
                 new String[]{"\t\t\tIntroduksjon til algebra\thttp://red.ndla.no/nb/node/138014?fag=54\t\tArbeidsoppdrag"});
         Entity entity = parser.next();
@@ -360,7 +360,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void sub_resource_type_overrides_resource_type() throws Exception {
+    public void sub_resource_type_overrides_resource_type() {
         init("Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tLenke til gammelt system\tRessurstype\tSubressurstype",
                 new String[]{"\t\t\tIntroduksjon til algebra\thttp://red.ndla.no/nb/node/138014?fag=54\tFagstoff\tArbeidsoppdrag"});
         Entity entity = parser.next();
@@ -370,7 +370,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void blank_lines_return_null() throws Exception {
+    public void blank_lines_return_null() {
         init("Emne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tLenke til gammelt system\tRessurstype\tSubressurstype",
                 new String[]{"Resource 1\t\t\t\thttp://red.ndla.no/nb/node/138014?fag=54",
                         "Resource 2\t\t\t\thttp://red.ndla.no/nb/node/136014?fag=54",
@@ -387,7 +387,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void lines_not_scheduled_for_import_return_null() throws Exception {
+    public void lines_not_scheduled_for_import_return_null() {
         init("Import\tEmne nivå 1	Emne nivå 2	Emne nivå 3	Læringsressurs	Lenke til gammelt system	Ressurstype	Subressurstype",
                 new String[]{"x\tTopic 1\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t",
                         "\tTopic 2\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t",
@@ -401,7 +401,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void can_read_filters() throws Exception {
+    public void can_read_filters() {
         init("Import\tEmne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tnn\tLenke til gammelt system\tRessurstype\tSubressurstype\tFilter\tRelevans\tFilter\tRelevans",
                 new String[]{"x\t\t\t\tIntroduksjon til calculus\t\thttp://red.ndla.no/nb/node/138014?fag=54\tFagstoff\t\tVG1\tTilvalgsstoff\tVG2\tKjernestoff\t\t\t\t\t"});
         Entity entity = parser.next();
@@ -410,7 +410,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void resources_have_rank() throws Exception {
+    public void resources_have_rank() {
         String[] lines = {"x\t\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tFagstoff\t\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
                 "x\t\t\t\tTall og algebra løsningsforslag YF\tTal og algebra løysingsforslag YF\thttp://red.ndla.no/nb/node/138015?fag=54\tFagstoff\t\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
                 "x\t\t\t\tTall og algebra oppgavesamling YF\tTal og algebra oppgåvesamling YF\thttp://red.ndla.no/nb/node/138014?fag=54\tFagstoff\t\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n"};
@@ -425,7 +425,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void topics_have_rank() throws Exception {
+    public void topics_have_rank() {
         String[] lines = {"x\tTall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n",
                 "x\t\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tFagstoff\t\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
                 "x\t\t\t\tTall og algebra løsningsforslag YF\tTal og algebra løysingsforslag YF\thttp://red.ndla.no/nb/node/138015?fag=54\tFagstoff\t\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
@@ -442,7 +442,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void resources_under_new_topic_restarts_rank_count() throws Exception {
+    public void resources_under_new_topic_restarts_rank_count() {
         String[] lines = {
                 "x\tTall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n",
                 "x\t\t\t\tTall og algebra fasit YF\tTal og algebra fasit YF\thttp://red.ndla.no/nb/node/138016?fag=54\tFagstoff\t\t1T-YF\tKjernestoff\t1T-ST\tTilleggsstoff\t\t\t\t\t\t\t\t\t\t\n",
@@ -464,7 +464,7 @@ public class TsvParserTest {
     }
 
     @Test
-    public void topics_have_correct_rank() throws Exception {
+    public void topics_have_correct_rank() {
         String[] lines = {
                 "x\tTall og algebra\t\t\t\tTal og algebra\thttp://red.ndla.no/nb/node/165193?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
                 "x\t\tTallregning\t\t\t\thttp://red.ndla.no/nb/node/165209?fag=161000\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t",
@@ -506,8 +506,8 @@ public class TsvParserTest {
         );
         Entity entity1 = parser.next();
         Entity entity2 = parser.next();
-        assertTrue(entity2.shouldSetPrimary);
-        assertFalse(entity1.shouldSetPrimary);
+        assertTrue(entity2.isPrimary);
+        assertFalse(entity1.isPrimary);
     }
 
     @Test

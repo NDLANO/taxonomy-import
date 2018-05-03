@@ -161,7 +161,7 @@ public class TsvParser implements Iterator<Entity> {
 
     private void setPrimary() {
         String shouldSetPrimary = getField(PRIMARY_FIELD);
-        result.shouldSetPrimary = !isBlank(shouldSetPrimary);
+        result.isPrimary = !isBlank(shouldSetPrimary);
     }
 
     private void setFilters() {
