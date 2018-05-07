@@ -10,38 +10,51 @@ import shutil
 #
 #   EXPECTED INPUT: A folder where the TSV files to import are saved as "1.tsv", "2.tsv" etc.
 #   according to the following list
-
-#    1  https://docs.google.com/spreadsheets/d/1q-A35Q_PZ6xsFx0EkeLHlDTuEQi2evNNB-pGfThiSPo/
-#    2  https://docs.google.com/spreadsheets/d/16SW5rFxpOXBW7tJV-OuhpRBto1vcqZDQ6MMQSYWNvUI/
-#    3  https://docs.google.com/spreadsheets/d/1srIDLu9B7pM4Yjvsu-7S2LBZBWK665rD1Qph5IevCPU/
-#    4  https://docs.google.com/spreadsheets/d/16ZomBB7X56q2dhqxYurBB7ysU-a7Xja94K775i-pYzs/
-#    5  https://docs.google.com/spreadsheets/d/1abr7bK8nbbiDai364QKx8-BYN5xgZC9yt0Vf-ElUQ8Y/
-
-#    6  https://docs.google.com/spreadsheets/d/1XAwgVE4mTg-kGuB0jbEg05iJuHLBapPgZhd0pzrbjqc/
-#    7  https://docs.google.com/spreadsheets/d/1LMIR3tVwR41ppkEjG-cVjf-yzelIOJtED_kaypvhblw/
-#    8  https://docs.google.com/spreadsheets/d/1D4YngL5Jb5so3Jdm4RrIRy43CVccRsu-NUw1FwH4jyY/
-#    9  https://docs.google.com/spreadsheets/d/1YOxZ78mBBxZAl1I834oHhj1kqbF5n2OekDZDJT-HtQU/
-#   10  https://docs.google.com/spreadsheets/d/1KZFqT4KlFbDPVge0evUP5pR754tTpTE7lfRJpQNzDvw/
-
-#   11  https://docs.google.com/spreadsheets/d/1310W8EjeegGxKWuuF00lz44_XsTJNLTYxQzKJWyV_74/
-#   12  https://docs.google.com/spreadsheets/d/1_Gha5AVP5wUAfhF9BeQIWVyPElAsIReOYmVfZhedcyo/
-#   13  https://docs.google.com/spreadsheets/d/1g_dV6vesx61XOQGBPL0xW4lDGmFxGWJD2ZsrDy0nP-8/
-#   14  https://docs.google.com/spreadsheets/d/1I7r0SRG0NXr2ML6wYffEr-bkoURj-ERdA88h1Vu9oq0/
-#   15  https://docs.google.com/spreadsheets/d/19IClAPKQloxKn-iTs1Bnnaden34-lNgoVEAmVtKxMh0/
-
-#   16  https://docs.google.com/spreadsheets/d/1CX6oEo8YPCY3j_Dv8spnxs4NsI59LFfwfDF6enAcMac/
-#   17  https://docs.google.com/spreadsheets/d/1JR4zsKyh7LC-vMG-EC-X_ovpg14IbUH3Qa3Z-flF5m0/
-#   18  https://docs.google.com/spreadsheets/d/1FnptdafPRBH5cqzjAf_JOZD2zz25W8kUMFIpUJ1v910/
-#
 #   OUTPUT: Shell scripts for spooling to each AWS environment, and copies of the input files ready to email
 #   in the export folder.
-#
-#   Author: oystein.ovrebo@bouvet.no
 
 #   SET THESE VALUES before running - must point to existing folders
-input_folder = "2018-04/"
-export_folder = "2018-04/ndla-spoling-export/"
-fs_root = "/Users/kjetil.hamre/Documents/"
+#input_folder = "2018-04/"
+input_folder = "ndla-spoling-05-07/"
+#export_folder = "2018-04/ndla-spoling-export/"
+export_folder = "ndla-export-05-07/"
+#fs_root = "/Users/kjetil.hamre/Documents/"
+fs_root = "/mnt/c/"
+
+#   TSV files are downloaded from these URLs:
+
+#    1  https://docs.google.com/spreadsheets/d/1q-A35Q_PZ6xsFx0EkeLHlDTuEQi2evNNB-pGfThiSPo/  medieuttrykk
+#    2  https://docs.google.com/spreadsheets/d/16SW5rFxpOXBW7tJV-OuhpRBto1vcqZDQ6MMQSYWNvUI/  kinesisk
+#    3  https://docs.google.com/spreadsheets/d/1srIDLu9B7pM4Yjvsu-7S2LBZBWK665rD1Qph5IevCPU/  samfunnsfag
+#    4  https://docs.google.com/spreadsheets/d/16ZomBB7X56q2dhqxYurBB7ysU-a7Xja94K775i-pYzs/  helsearbeiderfag-vg2
+#    5  https://docs.google.com/spreadsheets/d/1abr7bK8nbbiDai364QKx8-BYN5xgZC9yt0Vf-ElUQ8Y/  test
+
+#    6  https://docs.google.com/spreadsheets/d/1XAwgVE4mTg-kGuB0jbEg05iJuHLBapPgZhd0pzrbjqc/  brønnteknikk
+#    7  https://docs.google.com/spreadsheets/d/1LMIR3tVwR41ppkEjG-cVjf-yzelIOJtED_kaypvhblw/  markedsføring-og-ledelse
+#    8  https://docs.google.com/spreadsheets/d/1D4YngL5Jb5so3Jdm4RrIRy43CVccRsu-NUw1FwH4jyY/  tysk
+#    9  https://docs.google.com/spreadsheets/d/1YOxZ78mBBxZAl1I834oHhj1kqbF5n2OekDZDJT-HtQU/  historie
+#   10  https://docs.google.com/spreadsheets/d/1KZFqT4KlFbDPVge0evUP5pR754tTpTE7lfRJpQNzDvw/  matematikk-fellesfag
+
+#   11  https://docs.google.com/spreadsheets/d/1310W8EjeegGxKWuuF00lz44_XsTJNLTYxQzKJWyV_74/  bygg-og-anleggsteknikk
+#   12  https://docs.google.com/spreadsheets/d/1_Gha5AVP5wUAfhF9BeQIWVyPElAsIReOYmVfZhedcyo/  service-og-samferdsel
+#   13  https://docs.google.com/spreadsheets/d/1g_dV6vesx61XOQGBPL0xW4lDGmFxGWJD2ZsrDy0nP-8/  naturbruk
+#   14  https://docs.google.com/spreadsheets/d/1I7r0SRG0NXr2ML6wYffEr-bkoURj-ERdA88h1Vu9oq0/  medie-og-informasjonskunnskap
+#   15  https://docs.google.com/spreadsheets/d/19IClAPKQloxKn-iTs1Bnnaden34-lNgoVEAmVtKxMh0/  sør-samisk
+
+#   16  https://docs.google.com/spreadsheets/d/1CX6oEo8YPCY3j_Dv8spnxs4NsI59LFfwfDF6enAcMac/  elektrofag
+#   17  https://docs.google.com/spreadsheets/d/1JR4zsKyh7LC-vMG-EC-X_ovpg14IbUH3Qa3Z-flF5m0/  engelskspråklig-litteratur-og-kultur
+#   18  https://docs.google.com/spreadsheets/d/1FnptdafPRBH5cqzjAf_JOZD2zz25W8kUMFIpUJ1v910/  kommunikasjon-og-kultur
+#   19  https://docs.google.com/spreadsheets/d/1V8PNUocFJ09s63uWjL88UACFcIYh0xWlyhInlp9cG_Q/  norsk
+#   20  https://docs.google.com/spreadsheets/d/121vfBZR9RvwFfYD8rqZfQEMSxGSvKj1zstNa2Jiu3ZI/  film
+#
+#   21  https://docs.google.com/spreadsheets/d/1SXV7O7xwKbyi7tUc86mYwYk3c9gLnSUVwOYNH8quBEw/  naturfag
+#   22  https://docs.google.com/spreadsheets/d/1cU1B8QbFAl3d-9uD2E2kK4HZoKWxpCxgkkiQJSgnKQ4/  salg-service-sikkerhet
+#   23  https://docs.google.com/spreadsheets/d/1pJH4KE1FA1W9nnQ0vkgIpZGCrksg0aEjtrNUGHCxtTg/  samfunnsfaglig-engelsk
+#   24  https://docs.google.com/spreadsheets/d/1TldbFJRmIIcVCBFUO5F1Ae8NJHyrUy0pN6n-D8wZr50/  helse-og-oppvekst
+#   25  https://docs.google.com/spreadsheets/d/1dHnhasaBYDoF9768FLlHajt0hnp0KoEpxrCrYiNzZ1A/  ikt-servicefag
+#
+#   26 https://docs.google.com/spreadsheets/d/1XGiUf6GdYbIgOPYZ4iLDyIttOPKD43BPKpy526ELq8A/   kroppsøving
+
 
 jar_location = "target/taxonomy-import.jar"
 
@@ -54,8 +67,10 @@ date = year + month + day
 servers = [
     ("test", "http://ndla-taxonomy-test.uarauzeick.eu-central-1.elasticbeanstalk.com/"),
     ("brukertest", "http://ndla-taxonomy-brukertest.uarauzeick.eu-central-1.elasticbeanstalk.com/"),
+    ("spoletest", "http://ndla-taxonomy-spoletest.eu-central-1.elasticbeanstalk.com/"),
     ("staging", "http://ndla-taxonomy-staging.uarauzeick.eu-central-1.elasticbeanstalk.com/"),
-    ("prod", "http://ndla-taxonomy-prod.uarauzeick.eu-central-1.elasticbeanstalk.com/")
+    ("prod", "http://ndla-taxonomy-prod.uarauzeick.eu-central-1.elasticbeanstalk.com/"),
+    ("dev", "http://ndla-taxonomy-dev.eu-central-1.elasticbeanstalk.com/")
 ]
 
 # Maps short names to "pretty names" for subjects, ordered by ID
@@ -85,7 +100,9 @@ subjects = [
     ("naturfag", "Naturfag"),
     ("salg-service-sikkerhet", "Salg, service og sikkerhet Vg2"),
     ("samfunnsfaglig-engelsk", "Samfunnsfaglig engelsk"),
-    ("helse-og-oppvekst", "Helse- og oppvekstfag Vg1")
+    ("helse-og-oppvekst", "Helse- og oppvekstfag Vg1"),
+    ("ikt-servicefag", "IKT Servicefag Vg2"),
+    ("kroppsøving", "Kroppsøving")
 ]
 
 
