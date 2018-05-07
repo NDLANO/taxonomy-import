@@ -1,11 +1,17 @@
 package no.ndla.taxonomy;
 
 import junit.framework.TestCase;
+import no.ndla.taxonomy.client.TaxonomyRestClient;
 import no.ndla.taxonomy.client.subjects.SubjectIndexDocument;
 import no.ndla.taxonomy.client.subjects.TopicIndexDocument;
 import org.junit.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +22,11 @@ import static no.ndla.taxonomy.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class ImportSubjectTest extends ImporterTest {
+public class ImportSubjectTest {
+    public static final String HTTP_LOCALHOST_5000 = "http://localhost:5000";
+    RestTemplate restTemplate = new RestTemplate();
+    Importer importer = new Importer(new TaxonomyRestClient(HTTP_LOCALHOST_5000, restTemplate));
+
     @Test
     public void can_add_a_subject() {
         Entity entity = new Entity.Builder()
@@ -270,7 +280,7 @@ public class ImportSubjectTest extends ImporterTest {
 
     @Test
      /*
-     Verify that only primary resources are deleted. Secondary resources shall remain
+     Verify that only primary resources are listed. Secondary resources shall remain
     */
     public void can_get_list_of_resources_and_topics_for_subject_but_no_secondary_resources() {
         Entity subject = new Entity.Builder()
@@ -332,6 +342,31 @@ public class ImportSubjectTest extends ImporterTest {
 
         List<Entity> foundEntities = importer.listResourcesAndTopicsForSubjects(URI.create("urn:subject:14"));
         assertEquals(4, foundEntities.size());
+    }
+
+    @Test
+    public void canDeleteList() {
+        can_get_list_of_resources_and_topics_for_subject_but_no_secondary_resources();
+        List<Entity> foundEntities = importer.listResourcesAndTopicsForSubjects(URI.create("urn:subject:14"));
+        importer.deleteList(foundEntities);
+        assertEquals(0, importer.listResourcesAndTopicsForSubjects(URI.create("urn:subject:14")).size());
+    }
+
+    @Test
+    public void candDeleteListWith404() {
+        RestTemplate restDummy = new RestTemplate() {
+            @Override
+            public void delete(String url, Object... urlVariables) throws RestClientException {
+                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, null, null, null, null);
+            }
+        };
+        Importer importer = new Importer(new TaxonomyRestClient(HTTP_LOCALHOST_5000, restDummy));
+
+        List<Entity> items = Arrays.asList(new Entity.Builder()
+                .type("Topic")
+                .name("Geometri")
+                .id(URI.create("urn:topic:R11")).build());
+        importer.deleteList(items);
     }
 
 }

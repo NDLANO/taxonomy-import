@@ -1,5 +1,6 @@
 package no.ndla.taxonomy.client;
 
+import no.ndla.taxonomy.Entity;
 import no.ndla.taxonomy.Importer;
 import no.ndla.taxonomy.Translation;
 import no.ndla.taxonomy.client.filters.CreateFilterCommand;
@@ -331,4 +332,11 @@ public class TaxonomyRestClient {
         restTemplate.setInterceptors(interceptors);
     }
 
+    public void removeEntity(Entity entity) {
+        if ("Topic".equals(entity.type)) {
+            restTemplate.delete(urlBase + "/v1/topics/" + entity.getId().toString());
+        } else if ("Resource".equals(entity.type)) {
+            restTemplate.delete(urlBase + "/v1/resources/" + entity.getId().toString());
+        }
+    }
 }

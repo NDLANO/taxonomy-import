@@ -10,6 +10,7 @@ import no.ndla.taxonomy.client.subjects.TopicIndexDocument;
 import no.ndla.taxonomy.client.topicResources.TopicResourceIndexDocument;
 import no.ndla.taxonomy.client.topicSubtopics.TopicSubtopicIndexDocument;
 import no.ndla.taxonomy.client.topics.SubtopicIndexDocument;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.net.URI;
 import java.util.*;
@@ -448,9 +449,17 @@ public class Importer {
                     resultList.add(resourceEntity);
                 }
             }
-
         }
         return resultList;
     }
 
+    public void deleteList(List<Entity> entities) {
+        for (Entity entity : entities) {
+            try {
+                restClient.removeEntity(entity);
+            } catch (HttpClientErrorException ignore) {
+                System.out.println("Failed to remove: " + entity + " due to " + ignore.toString() + " - maybe node occurred twice in taxonomy?");
+            }
+        }
+    }
 }

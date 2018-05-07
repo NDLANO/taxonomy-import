@@ -1,10 +1,12 @@
 package no.ndla.taxonomy;
 
+import no.ndla.taxonomy.client.TaxonomyRestClient;
 import no.ndla.taxonomy.client.resources.ResourceIndexDocument;
 import no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument;
 import no.ndla.taxonomy.client.resources.UpdateResourceCommand;
 import no.ndla.taxonomy.client.topicResources.TopicResourceIndexDocument;
 import org.junit.Test;
+import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -17,7 +19,10 @@ import static no.ndla.taxonomy.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class ImportResourceTest extends ImporterTest {
+public class ImportResourceTest {
+
+    RestTemplate restTemplate = new RestTemplate();
+    Importer importer = new Importer(new TaxonomyRestClient("http://localhost:5000", restTemplate));
 
     @Test
     public void can_add_resource() {

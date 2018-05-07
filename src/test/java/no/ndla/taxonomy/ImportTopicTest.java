@@ -1,8 +1,10 @@
 package no.ndla.taxonomy;
 
+import no.ndla.taxonomy.client.TaxonomyRestClient;
 import no.ndla.taxonomy.client.topicSubtopics.TopicSubtopicIndexDocument;
 import no.ndla.taxonomy.client.topics.TopicIndexDocument;
 import org.junit.Test;
+import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -12,7 +14,10 @@ import static no.ndla.taxonomy.TestUtils.assertAnyTrue;
 import static no.ndla.taxonomy.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 
-public class ImportTopicTest extends ImporterTest {
+public class ImportTopicTest {
+    RestTemplate restTemplate = new RestTemplate();
+    Importer importer = new Importer(new TaxonomyRestClient("http://localhost:5000", restTemplate));
+
     @Test
     public void can_add_topic() {
         Entity topicEntity = new Entity.Builder()

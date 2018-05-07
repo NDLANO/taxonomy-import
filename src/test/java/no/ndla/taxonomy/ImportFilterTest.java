@@ -1,8 +1,10 @@
 package no.ndla.taxonomy;
 
+import no.ndla.taxonomy.client.TaxonomyRestClient;
 import no.ndla.taxonomy.client.relevances.RelevanceIndexDocument;
 import no.ndla.taxonomy.client.resources.FilterIndexDocument;
 import org.junit.Test;
+import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -13,7 +15,10 @@ import static no.ndla.taxonomy.TestUtils.assertAnyTrue;
 import static no.ndla.taxonomy.TestUtils.baseUrl;
 import static org.junit.Assert.assertEquals;
 
-public class ImportFilterTest extends ImporterTest {
+public class ImportFilterTest {
+
+    RestTemplate restTemplate = new RestTemplate();
+    Importer importer = new Importer(new TaxonomyRestClient("http://localhost:5000", restTemplate));
 
     @Test
     public void can_import_filter() {
