@@ -16,7 +16,7 @@ public class TsvParser implements Iterator<Entity> {
     private static final String TOPIC_LEVEL_ONE = "Emne nivå 1";
     public static final String TOPIC_LEVEL_TWO = "Emne nivå 2";
     private static final String TOPIC_LEVEL_THREE = "Emne nivå 3";
-    private static final String PRIMARY_FIELD = "Primærtilknytning";
+    private static final String IS_SECONDARY_FIELD = "Sekundærtilknytning";
     private Map<String, ResourceType> resourceTypes;
 
     private StringIterator lines;
@@ -154,14 +154,14 @@ public class TsvParser implements Iterator<Entity> {
         }
         setParent();
         setFilters();
-        setPrimary();
+        setSecondary();
 
         return result;
     }
 
-    private void setPrimary() {
-        String shouldSetPrimary = getField(PRIMARY_FIELD);
-        result.isPrimary = !isBlank(shouldSetPrimary);
+    private void setSecondary() {
+        String shouldSetPrimary = getField(IS_SECONDARY_FIELD);
+        result.isPrimary = isBlank(shouldSetPrimary);
     }
 
     private void setFilters() {

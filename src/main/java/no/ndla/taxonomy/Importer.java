@@ -10,7 +10,6 @@ import no.ndla.taxonomy.client.subjects.TopicIndexDocument;
 import no.ndla.taxonomy.client.topicResources.TopicResourceIndexDocument;
 import no.ndla.taxonomy.client.topicSubtopics.TopicSubtopicIndexDocument;
 import no.ndla.taxonomy.client.topics.SubtopicIndexDocument;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.net.URI;
 import java.util.*;
@@ -94,6 +93,9 @@ public class Importer {
         try {
             boolean hasFoundCurrentTopicConnection = false;
             if (currentSubject != null) {
+                //!!The code below will not succeed if a subtopic has several parents (both primary and secondary)
+                //Instead of relying on edges from the recursive getTopicsForSubject, which only gives primary connections
+                //another solution must be made - maybe a new api call.
                 TopicIndexDocument[] topicsForSubject = restClient.getTopicsForSubject(currentSubject.getId());
                 for (TopicIndexDocument topic : topicsForSubject) {
                     if (topic.id.equals(entity.getId())) {
@@ -433,20 +435,20 @@ public class Importer {
                     .parent(topicEntity)
                     .isPrimary(topic.isPrimary)
                     .build();
-            resultList.add(entity);
             if (topic.isPrimary) {
+                resultList.add(entity);
                 resultList.addAll(listResourcesAndTopics(entity));
-            }
-            no.ndla.taxonomy.client.topics.ResourceIndexDocument[] resources = restClient.getResourcesForTopic(topic.id);
-            for (no.ndla.taxonomy.client.topics.ResourceIndexDocument resource : resources) {
-                if (resource.isPrimary) {
-                    Entity resourceEntity = new Entity.Builder()
-                            .type("Resource")
-                            .name(resource.name)
-                            .id(resource.id)
-                            .isPrimary(resource.isPrimary)
-                            .build();
-                    resultList.add(resourceEntity);
+                no.ndla.taxonomy.client.topics.ResourceIndexDocument[] resources = restClient.getResourcesForTopic(topic.id);
+                for (no.ndla.taxonomy.client.topics.ResourceIndexDocument resource : resources) {
+                    if (resource.isPrimary) {
+                        Entity resourceEntity = new Entity.Builder()
+                                .type("Resource")
+                                .name(resource.name)
+                                .id(resource.id)
+                                .isPrimary(resource.isPrimary)
+                                .build();
+                        resultList.add(resourceEntity);
+                    }
                 }
             }
         }
@@ -454,12 +456,10 @@ public class Importer {
     }
 
     public void deleteList(List<Entity> entities) {
+        System.out.println("Deleting list of " + entities.size() + " entities");
         for (Entity entity : entities) {
-            try {
-                restClient.removeEntity(entity);
-            } catch (HttpClientErrorException ignore) {
-                System.out.println("Failed to remove: " + entity + " due to " + ignore.toString() + " - maybe node occurred twice in taxonomy?");
-            }
+            System.out.println(entity.toString());
+            restClient.removeEntity(entity);
         }
     }
 }

@@ -5,13 +5,9 @@ import no.ndla.taxonomy.client.TaxonomyRestClient;
 import no.ndla.taxonomy.client.subjects.SubjectIndexDocument;
 import no.ndla.taxonomy.client.subjects.TopicIndexDocument;
 import org.junit.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -268,14 +264,14 @@ public class ImportSubjectTest {
         importer.doImport(topic211);
 
         List<Entity> foundEntities = importer.listResourcesAndTopicsForSubjects(URI.create("urn:subject:13"));
-        assertEquals(3, foundEntities.size());
+        assertEquals(2, foundEntities.size());
         assertTrue(foundEntities.stream().anyMatch(entity -> entity.getId().equals(URI.create("urn:topic:P11"))));
         assertTrue(foundEntities.stream().anyMatch(entity -> entity.getId().equals(URI.create("urn:topic:P111"))));
-        assertTrue(foundEntities.stream().anyMatch(entity -> entity.getId().equals(URI.create("urn:topic:P21"))));
+        assertFalse(foundEntities.stream().anyMatch(entity -> entity.getId().equals(URI.create("urn:topic:P21"))));
         assertFalse(foundEntities.stream().anyMatch(entity -> entity.getId().equals(URI.create("urn:topic:P211"))));
 
+        assertTrue(foundEntities.stream().anyMatch(entity -> entity.getId().equals(URI.create("urn:topic:P11")) && entity.isPrimary));
         assertTrue(foundEntities.stream().anyMatch(entity -> entity.getId().equals(URI.create("urn:topic:P111")) && entity.isPrimary));
-        assertFalse(foundEntities.stream().anyMatch(entity -> entity.getId().equals(URI.create("urn:topic:P21")) && entity.isPrimary));
     }
 
     @Test
@@ -345,28 +341,52 @@ public class ImportSubjectTest {
     }
 
     @Test
-    public void canDeleteList() {
-        can_get_list_of_resources_and_topics_for_subject_but_no_secondary_resources();
-        List<Entity> foundEntities = importer.listResourcesAndTopicsForSubjects(URI.create("urn:subject:14"));
-        importer.deleteList(foundEntities);
-        assertEquals(0, importer.listResourcesAndTopicsForSubjects(URI.create("urn:subject:14")).size());
+     /*
+     Verify that only primary resources are listed. Secondary resources shall remain
+    */
+    public void can_get_list_of_resources_and_topics_for_subject_but_no_secondary_resources_2() {
+        Entity subject = new Entity.Builder()
+                .type("Subject")
+                .name("Mathematics")
+                .id(URI.create("urn:subject:15"))
+                .build();
+        importer.doImport(subject);
+
+        Entity topic11 = new Entity.Builder()
+                .type("Topic")
+                .name("Geometri")
+                .id(URI.create("urn:topic:m11"))
+                .parent(subject)
+                .build();
+        importer.doImport(topic11);
+
+        Entity topic12 = new Entity.Builder()
+                .type("Topic")
+                .name("Praksis")
+                .id(URI.create("urn:topic:m12"))
+                .parent(subject)
+                .build();
+        importer.doImport(topic12);
+
+        Entity topic111 = new Entity.Builder()
+                .type("Topic")
+                .name("Pytagoras")
+                .id(URI.create("urn:topic:m111"))
+                .parent(topic11)
+                .build();
+        importer.doImport(topic111);
+        topic111.parent = topic12;
+        importer.doImport(topic111);
+
+        List<Entity> foundEntities = importer.listResourcesAndTopicsForSubjects(URI.create("urn:subject:15"));
+        assertEquals(3, foundEntities.size());
     }
 
     @Test
-    public void candDeleteListWith404() {
-        RestTemplate restDummy = new RestTemplate() {
-            @Override
-            public void delete(String url, Object... urlVariables) throws RestClientException {
-                throw new HttpClientErrorException(HttpStatus.NOT_FOUND, null, null, null, null);
-            }
-        };
-        Importer importer = new Importer(new TaxonomyRestClient(HTTP_LOCALHOST_5000, restDummy));
-
-        List<Entity> items = Arrays.asList(new Entity.Builder()
-                .type("Topic")
-                .name("Geometri")
-                .id(URI.create("urn:topic:R11")).build());
-        importer.deleteList(items);
+    public void canDeleteList() {
+        can_get_list_of_resources_and_topics_for_subject_but_no_secondary_resources();
+        List<Entity> foundEntities = importer.listResourcesAndTopicsForSubjects(URI.create("urn:subject:15"));
+        importer.deleteList(foundEntities);
+        assertEquals(0, importer.listResourcesAndTopicsForSubjects(URI.create("urn:subject:15")).size());
     }
-
 }

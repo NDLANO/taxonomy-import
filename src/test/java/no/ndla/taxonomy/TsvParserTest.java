@@ -23,6 +23,7 @@ public class TsvParserTest {
     public void setUp() {
         subject = new Entity.Builder()
                 .name("Matematikk")
+                .type("Subject")
                 .id(URI.create("urn:subject:1"))
                 .build()
         ;
@@ -498,16 +499,16 @@ public class TsvParserTest {
     }
 
     @Test
-    public void entity_can_have_primary_connection_indication() {
-        init("Import	Emne nivå 1	Emne nivå 2	Emne nivå 3	Læringsressurs	Primærtilknytning	nn	revidert?	Publisert	Kvalitetssikring	Lenke til gammelt system	Ressurstype	Subressurstype	Flere ressurstyper? (x)	Hvilke andre ressurstyper?	Filter 	Relevans	Filter 	Relevans	Filter 	RelevansFilter 	Relevans	Filter 	Relevans	Filter 	Relevans	Filter 	Relevans",
+    public void entity_can_have_secondary_connection_indication() {
+        init("Import\tEmne nivå 1\tEmne nivå 2\tEmne nivå 3\tLæringsressurs\tSekundærtilknytning\tnn\trevidert?\tPublisert\tKvalitetssikring\tLenke til gammelt system\tRessurstype\tSubressurstype\tFlere ressurstyper? (x)\tHvilke andre ressurstyper?\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevansFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans\tFilter \tRelevans",
                 new String[] {
-                "x	Helse og sykdom							x		http://red.ndla.no/nb/node/172816?fag=52					YF VG2	Kjernestoff",
-        "x		Allmennstilstand og helsefagarbeiderens rolle ved observasjon			x			x		http://red.ndla.no/nb/node/173684?fag=52					YF VG2	Kjernestoff"}
+                        "x\tHelse og sykdom\t\t\t\tx\t\t\tx\t\thttp://red.ndla.no/nb/node/172816?fag=52\t\t\t\t\tYF VG2\tKjernestoff",
+                        "x\t\tAllmennstilstand og helsefagarbeiderens rolle ved observasjon\t\t\t\t\t\tx\t\thttp://red.ndla.no/nb/node/173684?fag=52\t\t\t\t\tYF VG2\tKjernestoff"}
         );
         Entity entity1 = parser.next();
         Entity entity2 = parser.next();
-        assertTrue(entity2.isPrimary);
         assertFalse(entity1.isPrimary);
+        assertTrue(entity2.isPrimary);
     }
 
     @Test
