@@ -1,5 +1,6 @@
 package no.ndla.taxonomy.client;
 
+import no.ndla.taxonomy.Entity;
 import no.ndla.taxonomy.Importer;
 import no.ndla.taxonomy.Translation;
 import no.ndla.taxonomy.client.filters.CreateFilterCommand;
@@ -26,6 +27,7 @@ import no.ndla.taxonomy.client.topicSubtopics.AddSubtopicToTopicCommand;
 import no.ndla.taxonomy.client.topicSubtopics.TopicSubtopicIndexDocument;
 import no.ndla.taxonomy.client.topicSubtopics.UpdateTopicSubtopicCommand;
 import no.ndla.taxonomy.client.topics.CreateTopicCommand;
+import no.ndla.taxonomy.client.topics.SubtopicIndexDocument;
 import no.ndla.taxonomy.client.topics.TopicIndexDocument;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
@@ -282,9 +284,19 @@ public class TaxonomyRestClient {
         return restTemplate.getForObject(url, no.ndla.taxonomy.client.subjects.TopicIndexDocument[].class);
     }
 
+    public no.ndla.taxonomy.client.subjects.TopicIndexDocument[] getTopicsForSubject(URI id, Boolean recursive) {
+        String url = urlBase + "/v1/subjects/" + id + "/topics?recursive=" + recursive;
+        return restTemplate.getForObject(url, no.ndla.taxonomy.client.subjects.TopicIndexDocument[].class);
+    }
+
     public TopicSubtopicIndexDocument getTopicSubtopic(URI connectionId) {
         String url = urlBase + "/v1/topic-subtopics/" + connectionId;
         return restTemplate.getForObject(url, TopicSubtopicIndexDocument.class);
+    }
+
+    public SubtopicIndexDocument[] getSubtopicsForTopic(URI id) {
+        String url = urlBase + "/v1/topics/" + id + "/topics";
+        return restTemplate.getForObject(url, SubtopicIndexDocument[].class);
     }
 
     public void updateTopicSubtopic(TopicSubtopicIndexDocument topicSubtopic) {
@@ -318,5 +330,13 @@ public class TaxonomyRestClient {
         interceptors.add(new HeaderRequestInterceptor("batch", "0"));
         System.out.println("Unsetting batch mode");
         restTemplate.setInterceptors(interceptors);
+    }
+
+    public void removeEntity(Entity entity) {
+        if ("Topic".equals(entity.type)) {
+            restTemplate.delete(urlBase + "/v1/topics/" + entity.getId().toString());
+        } else if ("Resource".equals(entity.type)) {
+            restTemplate.delete(urlBase + "/v1/resources/" + entity.getId().toString());
+        }
     }
 }

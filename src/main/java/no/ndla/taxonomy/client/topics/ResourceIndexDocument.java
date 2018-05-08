@@ -27,4 +27,7 @@ public class ResourceIndexDocument {
 
     @JsonProperty
     public URI connectionId;
+
+    @JsonProperty
+    public Boolean isPrimary;
 }

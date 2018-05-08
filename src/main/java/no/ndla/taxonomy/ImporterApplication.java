@@ -29,6 +29,9 @@ public class ImporterApplication {
     @Parameter(names = {"-n", "--subject-name"})
     private static String subjectName;
 
+    @Parameter(names = {"-d", "--delete-subject"}, description = "Delete subject before import")
+    private static Boolean deleteSubject = false;
+
     @Parameter(names = "--help", help = true)
     private static boolean help;
 
@@ -61,12 +64,14 @@ public class ImporterApplication {
     private void run(Importer importer) throws Exception {
         TsvParser.StringIterator iterator = new InputStreamStringIterator(System.in);
 
-        Entity subject = new Entity() {{
-            id = URI.create(subjectId);
-            name = subjectName;
-            type = "Subject";
-        }};
-
+        Entity subject = new Entity.Builder()
+                .id(URI.create(subjectId))
+                .name(subjectName)
+                .type("Subject")
+                .build();
+        if (deleteSubject) {
+            importer.deleteList(importer.listResourcesAndTopicsForSubjects(subject.getId()));
+        }
         importer.doImport(subject);
 
         Iterator<Entity> entities = new TsvParser(iterator, subject);
