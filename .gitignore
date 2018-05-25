@@ -11,3 +11,9 @@
 target
 *.backup
 
+test.sh
+staging.sh
+prod.sh
+dev.sh
+brukertest.sh
+spoletest.sh

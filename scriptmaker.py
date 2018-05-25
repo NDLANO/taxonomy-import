@@ -14,12 +14,15 @@ import shutil
 #   in the export folder.
 
 #   SET THESE VALUES before running - must point to existing folders
-#input_folder = "2018-04/"
-input_folder = "ndla-spoling-05-07/"
-#export_folder = "2018-04/ndla-spoling-export/"
-export_folder = "ndla-export-05-07/"
-#fs_root = "/Users/kjetil.hamre/Documents/"
+#   filesystem root (needed because Ubuntu on Windows...)
 fs_root = "/mnt/c/"
+
+#   folder where TSV input files are stored
+input_folder = "ndla-spoling-2018-05-25-spoletest/"
+
+#   folder where TSV files are copied to and renamed with pretty names for sending out mail
+export_folder = "ndla-export-2018-05-25-spoletest/"
+
 
 #   TSV files are downloaded from these URLs:
 
@@ -54,6 +57,8 @@ fs_root = "/mnt/c/"
 #   25  https://docs.google.com/spreadsheets/d/1dHnhasaBYDoF9768FLlHajt0hnp0KoEpxrCrYiNzZ1A/  ikt-servicefag
 #
 #   26 https://docs.google.com/spreadsheets/d/1XGiUf6GdYbIgOPYZ4iLDyIttOPKD43BPKpy526ELq8A/   kroppsøving
+#   27 https://docs.google.com/spreadsheets/d/17YfYge4G8KFXeLDC0BJCfdjBlWeYDYIlIsSM1GlxYDY/   internasjonal engelsk
+#   28 https://docs.google.com/spreadsheets/d/1F5jj5287R57Z-709bfFYBKykr5W-JYoO3fxMctlvoGs/   teknikk og industriell produksjon
 
 
 jar_location = "target/taxonomy-import.jar"
@@ -102,7 +107,9 @@ subjects = [
     ("samfunnsfaglig-engelsk", "Samfunnsfaglig engelsk"),
     ("helse-og-oppvekst", "Helse- og oppvekstfag Vg1"),
     ("ikt-servicefag", "IKT Servicefag Vg2"),
-    ("kroppsøving", "Kroppsøving")
+    ("kroppsøving", "Kroppsøving"),
+    ("internasjonal-engelsk", "Internasjonal engelsk"),
+    ("teknikk-og-industriell-produksjon", "Teknikk og internasjonal produksjon")
 ]
 
 
