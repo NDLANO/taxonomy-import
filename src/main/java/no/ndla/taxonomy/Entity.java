@@ -15,6 +15,7 @@ public class Entity {
     public Boolean isPrimary = false;
     public Entity parent;
     public List<Filter> filters = new ArrayList<>();
+    public String oldUrl;
     private URI id;
 
     public URI getId() {

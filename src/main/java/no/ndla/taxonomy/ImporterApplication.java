@@ -36,6 +36,7 @@ public class ImporterApplication {
     private static boolean help;
 
     public static void main(String[] args) throws Exception {
+        // System.setIn(new FileInputStream("/Users/kjetil.hamre/Documents/2018/2018-06/ndla-12-service-og-samferdsel-20180613-vg1.tsv"));
 
         ImporterApplication app = new ImporterApplication();
 

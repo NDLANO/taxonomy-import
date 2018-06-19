@@ -280,6 +280,7 @@ public class TsvParser implements Iterator<Entity> {
         } else {
             assertNumber(parameters[0]);
             result.nodeId = parameters[0];
+            result.oldUrl = urlString;
         }
         return true;
     }

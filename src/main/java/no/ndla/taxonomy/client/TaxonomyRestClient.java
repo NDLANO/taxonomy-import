@@ -1,5 +1,7 @@
 package no.ndla.taxonomy.client;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import no.ndla.taxonomy.Entity;
 import no.ndla.taxonomy.Importer;
 import no.ndla.taxonomy.Translation;
@@ -29,6 +31,8 @@ import no.ndla.taxonomy.client.topicSubtopics.UpdateTopicSubtopicCommand;
 import no.ndla.taxonomy.client.topics.CreateTopicCommand;
 import no.ndla.taxonomy.client.topics.SubtopicIndexDocument;
 import no.ndla.taxonomy.client.topics.TopicIndexDocument;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.RestTemplate;
 
@@ -339,4 +343,31 @@ public class TaxonomyRestClient {
             restTemplate.delete(urlBase + "/v1/resources/" + entity.getId().toString());
         }
     }
+
+    public void addUrlMapping(String oldUrl, URI nodeId, URI oldSubject) {
+        OldUrlMapping requestBody = new OldUrlMapping(oldUrl.substring(oldUrl.indexOf("ndla.no")), nodeId, oldSubject);
+        restTemplate.exchange(urlBase + "/v1/url/pathMap", HttpMethod.PUT, new HttpEntity<>(requestBody), OldUrlMapping.class);
+    }
+
+    public static class OldUrlMapping {
+        @JsonProperty
+        public String oldUrl;
+
+        @JsonProperty
+        public String nodeId;
+
+        @JsonProperty
+        public String subjectId;
+
+        @JsonCreator
+        public OldUrlMapping() {
+        }
+
+        public OldUrlMapping(String oldUrl, URI nodeId, URI subjectId) {
+            this.oldUrl = oldUrl;
+            this.nodeId = nodeId.toString();
+            this.subjectId = subjectId.toString();
+        }
+    }
+
 }

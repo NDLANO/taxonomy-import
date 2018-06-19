@@ -82,6 +82,7 @@ public class Importer {
             if (!currentTopicConnectionFound) {
                 System.out.println("Adding topic resource for: " + entity.getId());
                 restClient.addTopicResource(entity.parent.getId(), entity.getId(), entity.rank, entity.isPrimary);
+                restClient.addUrlMapping(entity.oldUrl, entity.getId(), this.currentSubject.getId());
             }
         } catch (Exception e) {
             System.out.println("entity failed: " + entity.getId());
@@ -113,6 +114,7 @@ public class Importer {
             if (!hasFoundCurrentTopicConnection) {
                 System.out.println("Adding topic subtopics connection for topic: " + entity.getId() + " with rank " + entity.rank);
                 restClient.addTopicSubtopic(entity.parent.getId(), entity.getId(), entity.rank, entity.isPrimary);
+                restClient.addUrlMapping(entity.oldUrl, entity.getId(), this.currentSubject.getId());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -345,6 +347,7 @@ public class Importer {
             }
             System.out.println("Adding topic " + entity.getId() + " to subject " + entity.parent.getId());
             restClient.addSubjectTopic(entity.parent.getId(), entity.getId(), entity.rank);
+            restClient.addUrlMapping(entity.oldUrl, entity.getId(), this.currentSubject.getId());
         } catch (Exception e) {
             e.printStackTrace();
         }
