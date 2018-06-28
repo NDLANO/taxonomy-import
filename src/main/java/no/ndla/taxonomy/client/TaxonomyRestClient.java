@@ -346,12 +346,12 @@ public class TaxonomyRestClient {
 
     public void addUrlMapping(String oldUrl, URI nodeId, URI oldSubject) {
         OldUrlMapping requestBody = new OldUrlMapping(oldUrl.substring(oldUrl.indexOf("ndla.no")), nodeId, oldSubject);
-        restTemplate.exchange(urlBase + "/v1/url/pathMap", HttpMethod.PUT, new HttpEntity<>(requestBody), OldUrlMapping.class);
+        restTemplate.exchange(urlBase + "/v1/url/mapping", HttpMethod.PUT, new HttpEntity<>(requestBody), OldUrlMapping.class);
     }
 
     public static class OldUrlMapping {
         @JsonProperty
-        public String oldUrl;
+        public String url;
 
         @JsonProperty
         public String nodeId;
@@ -363,8 +363,8 @@ public class TaxonomyRestClient {
         public OldUrlMapping() {
         }
 
-        public OldUrlMapping(String oldUrl, URI nodeId, URI subjectId) {
-            this.oldUrl = oldUrl;
+        public OldUrlMapping(String url, URI nodeId, URI subjectId) {
+            this.url = url;
             this.nodeId = nodeId.toString();
             this.subjectId = subjectId.toString();
         }
