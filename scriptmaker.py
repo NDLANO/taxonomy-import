@@ -18,10 +18,10 @@ import shutil
 fs_root = "/mnt/c/"
 
 #   folder where TSV input files are stored
-input_folder = "ndla-spoling-2018-05-25-spoletest/"
+input_folder = "ndla-spoling/"
 
 #   folder where TSV files are copied to and renamed with pretty names for sending out mail
-export_folder = "ndla-export-2018-05-25-spoletest/"
+export_folder = "ndla-export/"
 
 
 #   TSV files are downloaded from these URLs:
@@ -85,7 +85,7 @@ subjects = [
     ("medieuttrykk", "Medieuttrykk og mediesamfunnet"),
     ("kinesisk", "Kinesisk"),
     ("samfunnsfag", "Samfunnsfag"),
-    ("helsearbeiderfag-vg2", "Vg 2 Helsearbeiderfag"),
+    ("helsearbeiderfag-vg2", "Helsearbeiderfag Vg2"),
     ("test", "Testfag"),
     ("brønnteknikk", "Brønnteknikk"),
     ("markedsføring-og-ledelse", "Markedsføring og ledelse 1"),
