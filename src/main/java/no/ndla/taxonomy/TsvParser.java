@@ -74,16 +74,16 @@ public class TsvParser implements Iterator<Entity> {
         String eksternRessurs = "Ekstern læringsressurs";
         String kildemateriale = "Kildemateriale";
         String emne = "Emne";
-
+        //top level
         resourceTypes.put("Læringssti", new ResourceType("Læringssti", null, URI.create("urn:resourcetype:learningPath")));
-        resourceTypes.put("Begrep", new ResourceType("Begrep", null, URI.create("urn:resourcetype:concept")));
         resourceTypes.put(fagstoff, new ResourceType(fagstoff, null, URI.create("urn:resourcetype:subjectMaterial")));
         resourceTypes.put(oppgaverOgAktiviteter, new ResourceType(oppgaverOgAktiviteter, null, URI.create("urn:resourcetype:tasksAndActivities")));
         resourceTypes.put(vurderingsressurs, new ResourceType(vurderingsressurs, null, URI.create("urn:resourcetype:reviewResource")));
         resourceTypes.put(eksternRessurs, new ResourceType(eksternRessurs, null, URI.create("urn:resourcetype:externalResource")));
         resourceTypes.put(kildemateriale, new ResourceType(kildemateriale, null, URI.create("urn:resourcetype:SourceMaterial")));
         resourceTypes.put(emne, new ResourceType(emne, null, URI.create("urn:resourcetype:topic")));
-
+        resourceTypes.put("Begrep", new ResourceType("Begrep", null, URI.create("urn:resourcetype:concept")));
+        //fagstoff
         resourceTypes.put("Film og filmklipp", new ResourceType("Film og filmklipp", fagstoff, URI.create("urn:resourcetype:movieAndClip")));
         resourceTypes.put("Forelesning og presentasjon", new ResourceType("Forelesning og presentasjon", fagstoff, URI.create("urn:resourcetype:lectureAndPresentation")));
         resourceTypes.put("Fagartikkel", new ResourceType("Fagartikkel", fagstoff, URI.create("urn:resourcetype:academicArticle")));
@@ -93,7 +93,7 @@ public class TsvParser implements Iterator<Entity> {
         resourceTypes.put("Veiledning", new ResourceType("Veiledning", fagstoff, URI.create("urn:resourcetype:guidance")));
         resourceTypes.put("Lydopptak", new ResourceType("Lydopptak", fagstoff, URI.create("urn:resourcetype:soundRecording")));
         resourceTypes.put("Oppslagsverk og ordliste", new ResourceType("Oppslagsverk og ordliste", fagstoff, URI.create("urn:resourcetype:dictionary")));
-
+        //oppgaver og aktiviteter
         resourceTypes.put("Oppgave", new ResourceType("Oppgave", oppgaverOgAktiviteter, URI.create("urn:resourcetype:task")));
         resourceTypes.put("Øvelse", new ResourceType("Øvelse", oppgaverOgAktiviteter, URI.create("urn:resourcetype:exercise")));
         resourceTypes.put("Arbeidsoppdrag", new ResourceType("Arbeidsoppdrag", oppgaverOgAktiviteter, URI.create("urn:resourcetype:workAssignment")));
@@ -114,6 +114,9 @@ public class TsvParser implements Iterator<Entity> {
         resourceTypes.put("Malerier- grafikk -kunstfoto", new ResourceType("Malerier- grafikk -kunstfoto", kildemateriale, URI.create("urn:resourcetype:paintingGraphicsPhoto")));
         resourceTypes.put("Litterære tekster", new ResourceType("Litterære tekster", kildemateriale, URI.create("urn:resourcetype:literaryText")));
         resourceTypes.put("Musikk", new ResourceType("Musikk", kildemateriale, URI.create("urn:resourcetype:music")));
+        resourceTypes.put("Dokumentarfilm", new ResourceType("Dokumentarfilm", kildemateriale, URI.create("urn:resourcetype:documentary")));
+        resourceTypes.put("Serier", new ResourceType("Serier", kildemateriale, URI.create("urn:resourcetype:series")));
+        resourceTypes.put("Filmklipp", new ResourceType("Filmklipp", kildemateriale, URI.create("urn:resourcetype:filmClip")));
 
         resourceTypes.put("Emnebeskrivelse", new ResourceType("Emnebeskrivelse", emne, URI.create("urn:resourcetype:topicDescription")));
 

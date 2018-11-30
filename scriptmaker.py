@@ -48,7 +48,7 @@ export_folder = "ndla-export/"
 #   17  https://docs.google.com/spreadsheets/d/1JR4zsKyh7LC-vMG-EC-X_ovpg14IbUH3Qa3Z-flF5m0/  engelskspråklig-litteratur-og-kultur
 #   18  https://docs.google.com/spreadsheets/d/1FnptdafPRBH5cqzjAf_JOZD2zz25W8kUMFIpUJ1v910/  kommunikasjon-og-kultur
 #   19  https://docs.google.com/spreadsheets/d/1V8PNUocFJ09s63uWjL88UACFcIYh0xWlyhInlp9cG_Q/  norsk
-#   20  https://docs.google.com/spreadsheets/d/121vfBZR9RvwFfYD8rqZfQEMSxGSvKj1zstNa2Jiu3ZI/  film
+#   20  https://docs.google.com/spreadsheets/d/121vfBZR9RvwFfYD8rqZfQEMSxGSvKj1zstNa2Jiu3ZI/  NDLA film
 #
 #   21  https://docs.google.com/spreadsheets/d/1SXV7O7xwKbyi7tUc86mYwYk3c9gLnSUVwOYNH8quBEw/  naturfag
 #   22  https://docs.google.com/spreadsheets/d/1cU1B8QbFAl3d-9uD2E2kK4HZoKWxpCxgkkiQJSgnKQ4/  salg-service-sikkerhet
@@ -59,7 +59,14 @@ export_folder = "ndla-export/"
 #   26 https://docs.google.com/spreadsheets/d/1XGiUf6GdYbIgOPYZ4iLDyIttOPKD43BPKpy526ELq8A/   kroppsøving
 #   27 https://docs.google.com/spreadsheets/d/17YfYge4G8KFXeLDC0BJCfdjBlWeYDYIlIsSM1GlxYDY/   internasjonal engelsk
 #   28 https://docs.google.com/spreadsheets/d/1F5jj5287R57Z-709bfFYBKykr5W-JYoO3fxMctlvoGs/   teknikk og industriell produksjon
-
+#   29 https://docs.google.com/spreadsheets/d/1imO2qaSVbQLpq24cnt8rzlZSMr7tigdDOHr--AMyt_Q/   praktisk matematikk
+#   30 https://docs.google.com/spreadsheets/d/1EhmDHgeaS76dvSeFCV2dVLbMpps3FLN1gwaMsRMmtn0/   Matematikk for yrkesfaglige programmer
+#   31 https://docs.google.com/spreadsheets/d/1p5LtP-nSpp4L81nRL6uThDOPftb41h9rUdVt5rb8VJ8/   Matematikk for samfunnsfag
+#   32 https://docs.google.com/spreadsheets/d/1fs8zarUb28VnzRsdarO6D0u45eRaI-LAn82ez18ng1o/   Matematikk for realfag
+#   33 https://docs.google.com/spreadsheets/d/1dtLKlULCspVKxXod3TEzjiJRtNPBFvPWAG2qq1HxKEw/   1T - Matematikk fellesfag
+#   34 https://docs.google.com/spreadsheets/d/1t49dUUQFnrAKnmq8xftIzHkMbY08fQ9i7b-1lhi6CVc/   1P - Matematikk fellesfag
+#   35 https://docs.google.com/spreadsheets/d/1UtiPGBPS-h3VUdUejPRJjk0Mi1yad4SOHXjwUYxC024/   Reiseliv
+#   36 https://docs.google.com/spreadsheets/d/1ny0gSl57scuev-MCs7kXBmdKj-eEJqqYP4NuP0CI7LA/   Transport og logistikk
 
 jar_location = "target/taxonomy-import.jar"
 
@@ -75,7 +82,8 @@ servers = [
     ("spoletest", "http://ndla-taxonomy-spoletest.eu-central-1.elasticbeanstalk.com/"),
     ("staging", "http://ndla-taxonomy-staging.uarauzeick.eu-central-1.elasticbeanstalk.com/"),
     ("prod", "http://ndla-taxonomy-prod.uarauzeick.eu-central-1.elasticbeanstalk.com/"),
-    ("dev", "http://ndla-taxonomy-dev.eu-central-1.elasticbeanstalk.com/")
+    ("dev", "http://ndla-taxonomy-dev.eu-central-1.elasticbeanstalk.com/"),
+    ("localhost", "http://localhost:5000/")
 ]
 
 # Maps short names to "pretty names" for subjects, ordered by ID
@@ -101,15 +109,23 @@ subjects = [
     ("engelskspråklig-litteratur-og-kultur", "Engelskspråklig litteratur og kultur"),
     ("kommunikasjon-og-kultur", "Kommunikasjon og kultur Vg1, Vg2, Vg3"),
     ("norsk", "Norsk"),
-    ("film", "Film"),
+    ("ndla-film", "NDLA film"),
     ("naturfag", "Naturfag"),
     ("salg-service-sikkerhet", "Salg, service og sikkerhet Vg2"),
     ("samfunnsfaglig-engelsk", "Samfunnsfaglig engelsk"),
     ("helse-og-oppvekst", "Helse- og oppvekstfag Vg1"),
-    ("ikt-servicefag", "IKT Servicefag Vg2"),
+    ("ikt-servicefag", "IKT Servicefag"),
     ("kroppsøving", "Kroppsøving"),
     ("internasjonal-engelsk", "Internasjonal engelsk"),
-    ("teknikk-og-industriell-produksjon", "Teknikk og internasjonal produksjon")
+    ("teknikk-og-industriell-produksjon", "Teknikk og internasjonal produksjon"),
+    ("praktisk-matematikk", "Praktisk matematikk"),
+    ("matematikk-for-yrkesfag", "Matematikk for yrkesfaglige programmer"),
+    ("matematikk-for-samfunnsfag", "Matematikk for samfunnsfag"),
+    ("matematikk-for-realfag", "Matematikk for realfag"),
+    ("matematikk-1T-fellesfag", "1T - Matematikk fellesfag"),
+    ("matematikk-1P-fellesfag", "1P - Matematikk fellesfag"),
+    ("reiseliv", "Reiseliv"),
+    ("transport-og-logistikk", "Transport og logistikk")
 ]
 
 
