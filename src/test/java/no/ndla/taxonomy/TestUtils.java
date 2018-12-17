@@ -9,6 +9,9 @@ import static org.junit.Assert.fail;
 
 public class TestUtils {
     public static final String baseUrl = "http://localhost:5000";
+    public static final String clientId = "itest";
+    public static final String clientSecret = "[CLIENT SECRET]";
+    public static final String tokenServer = "[https://url.somewhere]";
 
     public static <V> void assertAnyTrue(V[] objects, Predicate<V> predicate) {
         assertTrue("Array was empty", objects.length > 0);

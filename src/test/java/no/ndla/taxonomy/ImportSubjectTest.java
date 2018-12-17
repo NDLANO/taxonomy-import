@@ -13,16 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 import static junit.framework.TestCase.assertTrue;
-import static no.ndla.taxonomy.TestUtils.assertAnyTrue;
-import static no.ndla.taxonomy.TestUtils.baseUrl;
+import static no.ndla.taxonomy.TestUtils.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 public class ImportSubjectTest {
-    public static final String HTTP_LOCALHOST_5000 = "http://localhost:5000";
-
     RestTemplate restTemplate = new RestTemplate();
-    Importer importer = new Importer(new TaxonomyRestClient(HTTP_LOCALHOST_5000, clientId, clientSecret, tokenServer, restTemplate));
+    Importer importer = new Importer(new TaxonomyRestClient(baseUrl, clientId, clientSecret, tokenServer, restTemplate));
 
     @Test
     public void can_add_a_subject() {

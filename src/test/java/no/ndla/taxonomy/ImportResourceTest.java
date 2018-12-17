@@ -14,15 +14,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static no.ndla.taxonomy.TestUtils.assertAnyTrue;
-import static no.ndla.taxonomy.TestUtils.baseUrl;
+import static no.ndla.taxonomy.TestUtils.*;
+import static no.ndla.taxonomy.TestUtils.tokenServer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class ImportResourceTest {
-
     RestTemplate restTemplate = new RestTemplate();
-    Importer importer = new Importer(new TaxonomyRestClient("http://localhost:5000", clientId, clientSecret, tokenServer, restTemplate));
+    Importer importer = new Importer(new TaxonomyRestClient(baseUrl, clientId, clientSecret, tokenServer, restTemplate));
 
     @Test
     public void can_add_resource() {

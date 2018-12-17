@@ -56,6 +56,10 @@ public class TaxonomyRestClient {
             interceptors.add(new HeaderRequestInterceptor("Authorization", "Bearer " + authentication.access_token));
 
             restTemplate.setInterceptors(interceptors);
+        }else if(clientId.equals("itest")){
+            List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+            interceptors.add(new HeaderRequestInterceptor("batch", "1"));
+            restTemplate.setInterceptors(interceptors);
         }else{
             System.out.println("No valid authentication. Exiting.");
             System.exit(0);
@@ -83,8 +87,8 @@ public class TaxonomyRestClient {
         try{
             response = authRestTemplate.exchange(token_server, HttpMethod.POST, request, Authentication.class);
             authentication = response.getBody();
-        }catch (HttpClientErrorException e){
-            System.out.println("401 wrong credentials? ");
+        }catch (IllegalStateException | HttpClientErrorException e){
+            System.out.println("401 Wrong Credentials? You are using the environment: " + token_server);
         }
     }
 

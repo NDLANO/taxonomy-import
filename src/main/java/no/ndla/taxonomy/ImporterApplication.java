@@ -42,7 +42,7 @@ public class ImporterApplication {
     private static boolean help;
 
     public static void main(String[] args) throws Exception {
-        //System.setIn(new FileInputStream("C:/[location]/1.tsv"));
+        System.setIn(new FileInputStream("C:/[LOCATION]/1.tsv"));
 
         ImporterApplication app = new ImporterApplication();
 

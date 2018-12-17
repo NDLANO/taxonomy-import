@@ -11,13 +11,13 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import static no.ndla.taxonomy.TestUtils.assertAnyTrue;
-import static no.ndla.taxonomy.TestUtils.baseUrl;
+import static no.ndla.taxonomy.TestUtils.*;
+import static no.ndla.taxonomy.TestUtils.tokenServer;
 import static org.junit.Assert.assertEquals;
 
 public class ImportTopicTest {
     RestTemplate restTemplate = new RestTemplate();
-    Importer importer = new Importer(new TaxonomyRestClient("http://localhost:5000", clientId, clientSecret, tokenServer, restTemplate));
+    Importer importer = new Importer(new TaxonomyRestClient(baseUrl, clientId, clientSecret, tokenServer, restTemplate));
 
     @Test
     public void can_add_topic() {
@@ -151,9 +151,9 @@ public class ImportTopicTest {
         importer.doImport(topicRank2);
 
         TopicIndexDocument[] topics = restTemplate.getForObject(baseUrl + "/v1/subjects/urn:subject:1/topics?recursive=true", TopicIndexDocument[].class);
-        assertEquals(parentEntity.getId(), topics[0].id);
-        assertEquals(topicRank1.getId(), topics[1].id);
-        assertEquals(topicRank2.getId(), topics[2].id);
+        assertEquals(0, topics[0].rank.intValue());
+        assertEquals(1, topics[1].rank.intValue());
+        assertEquals(2, topics[2].rank.intValue());
     }
 
     @Test

@@ -11,14 +11,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static no.ndla.taxonomy.Importer.*;
-import static no.ndla.taxonomy.TestUtils.assertAnyTrue;
-import static no.ndla.taxonomy.TestUtils.baseUrl;
+import static no.ndla.taxonomy.TestUtils.*;
+import static no.ndla.taxonomy.TestUtils.tokenServer;
 import static org.junit.Assert.assertEquals;
 
 public class ImportFilterTest {
-
     RestTemplate restTemplate = new RestTemplate();
-    Importer importer = new Importer(new TaxonomyRestClient("http://localhost:5000", clientId, clientSecret, tokenServer, restTemplate));
+    Importer importer = new Importer(new TaxonomyRestClient(baseUrl, clientId, clientSecret, tokenServer, restTemplate));
 
     @Test
     public void can_import_filter() {
