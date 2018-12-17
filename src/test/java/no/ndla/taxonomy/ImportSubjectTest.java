@@ -20,8 +20,9 @@ import static org.junit.Assert.assertFalse;
 
 public class ImportSubjectTest {
     public static final String HTTP_LOCALHOST_5000 = "http://localhost:5000";
+
     RestTemplate restTemplate = new RestTemplate();
-    Importer importer = new Importer(new TaxonomyRestClient(HTTP_LOCALHOST_5000, restTemplate));
+    Importer importer = new Importer(new TaxonomyRestClient(HTTP_LOCALHOST_5000, clientId, clientSecret, tokenServer, restTemplate));
 
     @Test
     public void can_add_a_subject() {

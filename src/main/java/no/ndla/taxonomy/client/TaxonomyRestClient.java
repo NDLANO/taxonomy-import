@@ -33,7 +33,9 @@ import no.ndla.taxonomy.client.topics.SubtopicIndexDocument;
 import no.ndla.taxonomy.client.topics.TopicIndexDocument;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
@@ -41,16 +43,23 @@ import java.util.*;
 
 public class TaxonomyRestClient {
     private RestTemplate restTemplate;
+    private Authentication authentication;
     private String urlBase;
 
-    public TaxonomyRestClient(String urlBase, RestTemplate restTemplate) {
+    public TaxonomyRestClient(String urlBase, String clientId, String clientSecret, String token_server, RestTemplate restTemplate) {
         this.urlBase = urlBase;
         this.restTemplate = restTemplate;
+        getAccesToken(clientId, clientSecret, token_server);
+        if(authentication != null){
+            List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+            interceptors.add(new HeaderRequestInterceptor("batch", "1"));
+            interceptors.add(new HeaderRequestInterceptor("Authorization", "Bearer " + authentication.access_token));
 
-        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
-        interceptors.add(new HeaderRequestInterceptor("batch", "1"));
-
-        restTemplate.setInterceptors(interceptors);
+            restTemplate.setInterceptors(interceptors);
+        }else{
+            System.out.println("No valid authentication. Exiting.");
+            System.exit(0);
+        }
     }
 
     private static final Map<String, String> controllerNames = new HashMap<String, String>() {
@@ -60,6 +69,24 @@ public class TaxonomyRestClient {
             put(Importer.RESOURCE_TYPE, "/v1/resources");
         }
     };
+
+    private void getAccesToken(String clientId, String clientSecret, String token_server){
+        RestTemplate authRestTemplate = new RestTemplate();
+        CreateAuthCommand cmd = new CreateAuthCommand();
+        cmd.grant_type = "client_credentials";
+        cmd.client_id = clientId;
+        cmd.client_secret = clientSecret;
+        cmd.audience = "ndla_system";
+
+        HttpEntity<CreateAuthCommand> request = new HttpEntity<>(cmd);
+        ResponseEntity<Authentication> response = null;
+        try{
+            response = authRestTemplate.exchange(token_server, HttpMethod.POST, request, Authentication.class);
+            authentication = response.getBody();
+        }catch (HttpClientErrorException e){
+            System.out.println("401 wrong credentials? ");
+        }
+    }
 
     public SubjectIndexDocument getSubject(URI id) {
         String url = urlBase + "/v1/subjects/" + id;
@@ -147,6 +174,7 @@ public class TaxonomyRestClient {
         cmd.id = id;
         cmd.name = name;
         cmd.contentUri = contentUri;
+
 
         return restTemplate.postForLocation(urlBase + "/v1/resources", cmd);
     }
@@ -330,7 +358,6 @@ public class TaxonomyRestClient {
 
     public void setNoBatchMode() {
         List<ClientHttpRequestInterceptor> interceptors = restTemplate.getInterceptors();
-        interceptors.clear();
         interceptors.add(new HeaderRequestInterceptor("batch", "0"));
         System.out.println("Unsetting batch mode");
         restTemplate.setInterceptors(interceptors);

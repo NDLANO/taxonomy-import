@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 
 public class ImportTopicTest {
     RestTemplate restTemplate = new RestTemplate();
-    Importer importer = new Importer(new TaxonomyRestClient("http://localhost:5000", restTemplate));
+    Importer importer = new Importer(new TaxonomyRestClient("http://localhost:5000", clientId, clientSecret, tokenServer, restTemplate));
 
     @Test
     public void can_add_topic() {
