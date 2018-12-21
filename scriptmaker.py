@@ -67,6 +67,7 @@ export_folder = "ndla-export/"
 #   34 https://docs.google.com/spreadsheets/d/1t49dUUQFnrAKnmq8xftIzHkMbY08fQ9i7b-1lhi6CVc/   1P - Matematikk fellesfag
 #   35 https://docs.google.com/spreadsheets/d/1UtiPGBPS-h3VUdUejPRJjk0Mi1yad4SOHXjwUYxC024/   Reiseliv
 #   36 https://docs.google.com/spreadsheets/d/1ny0gSl57scuev-MCs7kXBmdKj-eEJqqYP4NuP0CI7LA/   Transport og logistikk
+#   37 https://docs.google.com/spreadsheets/d/1H4EBhvVpaK9tnHdagm7X54YR_orYgg2A4Ij70SvSiF8/   Restaurant- og matfag Vg1
 
 jar_location = "target/taxonomy-import.jar"
 
@@ -102,22 +103,22 @@ subjects = [
     ("matematikk-fellesfag", "Matematikk fellesfag"),
     ("bygg-og-anleggsteknikk", "Bygg- og anleggsteknikk"),
     ("service-og-samferdsel", "Service og samferdsel Vg1"),
-    ("naturbruk", "Naturbruk vg 1"),
+    ("naturbruk", "Naturbruk Vg1"),
     ("medie-og-informasjonskunnskap", "Medie- og informasjonskunnskap"),
     ("sør-samisk", "Sørsamisk Vg1 og Vg2"),
-    ("elektrofag", "Elektrofag Vg1"),
+    ("elektrofag", "Elektrofag"),
     ("engelskspråklig-litteratur-og-kultur", "Engelskspråklig litteratur og kultur"),
-    ("kommunikasjon-og-kultur", "Kommunikasjon og kultur Vg1, Vg2, Vg3"),
+    ("kommunikasjon-og-kultur", "Kommunikasjon og kultur"),
     ("norsk", "Norsk"),
     ("ndla-film", "NDLA film"),
     ("naturfag", "Naturfag"),
     ("salg-service-sikkerhet", "Salg, service og sikkerhet Vg2"),
     ("samfunnsfaglig-engelsk", "Samfunnsfaglig engelsk"),
     ("helse-og-oppvekst", "Helse- og oppvekstfag Vg1"),
-    ("ikt-servicefag", "IKT Servicefag"),
+    ("ikt-servicefag", "IKT-servicefag Vg2"),
     ("kroppsøving", "Kroppsøving"),
     ("internasjonal-engelsk", "Internasjonal engelsk"),
-    ("teknikk-og-industriell-produksjon", "Teknikk og internasjonal produksjon"),
+    ("teknikk-og-industriell-produksjon", "Teknikk og industriell produksjon"),
     ("praktisk-matematikk", "Praktisk matematikk"),
     ("matematikk-for-yrkesfag", "Matematikk for yrkesfaglige programmer"),
     ("matematikk-for-samfunnsfag", "Matematikk for samfunnsfag"),
@@ -125,7 +126,8 @@ subjects = [
     ("matematikk-1T-fellesfag", "1T - Matematikk fellesfag"),
     ("matematikk-1P-fellesfag", "1P - Matematikk fellesfag"),
     ("reiseliv", "Reiseliv"),
-    ("transport-og-logistikk", "Transport og logistikk")
+    ("transport-og-logistikk", "Transport og logistikk"),
+    ("restaurant-og-matfag", "Restaurant- og matfag Vg1")
 ]
 
 
