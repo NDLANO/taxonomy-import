@@ -9,7 +9,7 @@ import static org.junit.Assert.fail;
 
 public class TestUtils {
     public static final String baseUrl = "http://localhost:5000";
-    public static final String clientId = "itest";
+    public static final String clientId = "ITEST";
     public static final String clientSecret = "[CLIENT SECRET]";
     public static final String tokenServer = "[https://url.somewhere]";
 

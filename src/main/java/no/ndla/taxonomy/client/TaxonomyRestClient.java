@@ -49,14 +49,14 @@ public class TaxonomyRestClient {
     public TaxonomyRestClient(String urlBase, String clientId, String clientSecret, String token_server, RestTemplate restTemplate) {
         this.urlBase = urlBase;
         this.restTemplate = restTemplate;
-        getAccesToken(clientId, clientSecret, token_server);
+        getAccessToken(clientId, clientSecret, token_server);
         if(authentication != null){
             List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
             interceptors.add(new HeaderRequestInterceptor("batch", "1"));
             interceptors.add(new HeaderRequestInterceptor("Authorization", "Bearer " + authentication.access_token));
 
             restTemplate.setInterceptors(interceptors);
-        }else if(clientId.equals("itest")){
+        }else if(clientId.equals("ITEST")){
             List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
             interceptors.add(new HeaderRequestInterceptor("batch", "1"));
             restTemplate.setInterceptors(interceptors);
@@ -74,7 +74,7 @@ public class TaxonomyRestClient {
         }
     };
 
-    private void getAccesToken(String clientId, String clientSecret, String token_server){
+    private void getAccessToken(String clientId, String clientSecret, String token_server){
         RestTemplate authRestTemplate = new RestTemplate();
         CreateAuthCommand cmd = new CreateAuthCommand();
         cmd.grant_type = "client_credentials";
