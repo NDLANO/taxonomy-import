@@ -49,20 +49,22 @@ public class TaxonomyRestClient {
     public TaxonomyRestClient(String urlBase, String clientId, String clientSecret, String token_server, RestTemplate restTemplate) {
         this.urlBase = urlBase;
         this.restTemplate = restTemplate;
-        getAccessToken(clientId, clientSecret, token_server);
-        if(authentication != null){
-            List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
-            interceptors.add(new HeaderRequestInterceptor("batch", "1"));
-            interceptors.add(new HeaderRequestInterceptor("Authorization", "Bearer " + authentication.access_token));
-
-            restTemplate.setInterceptors(interceptors);
-        }else if(clientId.equals("ITEST")){
+        if(clientId.equals("ITEST")){
             List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
             interceptors.add(new HeaderRequestInterceptor("batch", "1"));
             restTemplate.setInterceptors(interceptors);
         }else{
-            System.out.println("No valid authentication. Exiting.");
-            System.exit(0);
+            getAccessToken(clientId, clientSecret, token_server);
+            if(authentication != null){
+                List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+                interceptors.add(new HeaderRequestInterceptor("batch", "1"));
+                interceptors.add(new HeaderRequestInterceptor("Authorization", "Bearer " + authentication.access_token));
+
+                restTemplate.setInterceptors(interceptors);
+            }else{
+                System.out.println("No valid authentication. Exiting.");
+                System.exit(0);
+            }
         }
     }
 
