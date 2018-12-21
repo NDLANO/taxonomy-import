@@ -9,10 +9,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URI;
 import java.util.Iterator;
 
@@ -32,11 +29,20 @@ public class ImporterApplication {
     @Parameter(names = {"-d", "--delete-subject"}, description = "Delete subject before import")
     private static Boolean deleteSubject = false;
 
+    @Parameter(names = {"-ci", "--client-id"})
+    private static String clientId;
+
+    @Parameter(names = {"-ts", "--token-server"})
+    private static String tokenServer;
+
+    @Parameter(names = {"-cs", "--client-secret"})
+    private static String clientSecret;
+
     @Parameter(names = "--help", help = true)
     private static boolean help;
 
     public static void main(String[] args) throws Exception {
-        // System.setIn(new FileInputStream("/Users/kjetil.hamre/Documents/2018/2018-06/ndla-12-service-og-samferdsel-20180613-vg1.tsv"));
+        //System.setIn(new FileInputStream("C:/[LOCATION]/1.tsv"));
 
         ImporterApplication app = new ImporterApplication();
 
@@ -97,7 +103,7 @@ public class ImporterApplication {
 
     @Bean
     public TaxonomyRestClient restClient(RestTemplate restTemplate) {
-        return new TaxonomyRestClient(endpoint, restTemplate);
+        return new TaxonomyRestClient(endpoint, clientId, clientSecret, tokenServer, restTemplate);
     }
 
     @Bean

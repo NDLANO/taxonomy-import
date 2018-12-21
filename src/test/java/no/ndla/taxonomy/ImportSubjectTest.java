@@ -13,15 +13,13 @@ import java.util.List;
 import java.util.Map;
 
 import static junit.framework.TestCase.assertTrue;
-import static no.ndla.taxonomy.TestUtils.assertAnyTrue;
-import static no.ndla.taxonomy.TestUtils.baseUrl;
+import static no.ndla.taxonomy.TestUtils.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 public class ImportSubjectTest {
-    public static final String HTTP_LOCALHOST_5000 = "http://localhost:5000";
     RestTemplate restTemplate = new RestTemplate();
-    Importer importer = new Importer(new TaxonomyRestClient(HTTP_LOCALHOST_5000, restTemplate));
+    Importer importer = new Importer(new TaxonomyRestClient(BASE_URL, CLIENT_ID, CLIENT_SECRET, TOKEN_SERVER, restTemplate));
 
     @Test
     public void can_add_a_subject() {
@@ -34,7 +32,7 @@ public class ImportSubjectTest {
 
         importer.doImport(entity);
 
-        SubjectIndexDocument subject = restTemplate.getForObject(baseUrl + "/v1/subjects/urn:subject:3", SubjectIndexDocument.class);
+        SubjectIndexDocument subject = restTemplate.getForObject(BASE_URL + "/v1/subjects/urn:subject:3", SubjectIndexDocument.class);
         assertEquals("Matematikk", subject.name);
         assertEquals("urn:article:1", subject.contentUri.toString());
     }
@@ -55,7 +53,7 @@ public class ImportSubjectTest {
 
         importer.doImport(entity);
 
-        SubjectIndexDocument subject = restTemplate.getForObject(baseUrl + "/v1/subjects/urn:subject:4?language=nn", SubjectIndexDocument.class);
+        SubjectIndexDocument subject = restTemplate.getForObject(BASE_URL + "/v1/subjects/urn:subject:4?language=nn", SubjectIndexDocument.class);
         assertEquals("Design og handverk", subject.name);
     }
 
@@ -71,7 +69,7 @@ public class ImportSubjectTest {
         importer.doImport(entity);
         importer.doImport(entity);
 
-        SubjectIndexDocument[] subjects = restTemplate.getForObject(baseUrl + "/v1/subjects", SubjectIndexDocument[].class);
+        SubjectIndexDocument[] subjects = restTemplate.getForObject(BASE_URL + "/v1/subjects", SubjectIndexDocument[].class);
         assertAnyTrue(subjects, s -> s.name.equals("Matematikk"));
         assertAnyTrue(subjects, s -> s.id.toString().equals("urn:subject:3"));
     }
@@ -88,7 +86,7 @@ public class ImportSubjectTest {
 
         importer.doImport(entity);
 
-        SubjectIndexDocument subject = restTemplate.getForObject(baseUrl + "/v1/subjects/urn:subject:6", SubjectIndexDocument.class);
+        SubjectIndexDocument subject = restTemplate.getForObject(BASE_URL + "/v1/subjects/urn:subject:6", SubjectIndexDocument.class);
         assertEquals("urn:article:1", subject.contentUri.toString());
     }
 
@@ -109,7 +107,7 @@ public class ImportSubjectTest {
                 .build();
         importer.doImport(topicEntity);
 
-        TopicIndexDocument[] topics = restTemplate.getForObject(baseUrl + "/v1/subjects/urn:subject:1/topics", TopicIndexDocument[].class);
+        TopicIndexDocument[] topics = restTemplate.getForObject(BASE_URL + "/v1/subjects/urn:subject:1/topics", TopicIndexDocument[].class);
         assertAnyTrue(topics, t -> t.parent.equals(parentEntity.getId()));
     }
 
@@ -140,7 +138,7 @@ public class ImportSubjectTest {
                 .build();
         importer.doImport(topic2);
 
-        TopicIndexDocument[] topics = restTemplate.getForObject(baseUrl + "/v1/subjects/urn:subject:1/topics", TopicIndexDocument[].class);
+        TopicIndexDocument[] topics = restTemplate.getForObject(BASE_URL + "/v1/subjects/urn:subject:1/topics", TopicIndexDocument[].class);
         assertEquals(topicEntity.getId(), topics[0].id);
         assertEquals(topic2.getId(), topics[1].id);
     }

@@ -19,4 +19,7 @@ public class TopicIndexDocument {
 
     @JsonProperty
     public String path;
+
+    @JsonProperty
+    public Integer rank;
 }

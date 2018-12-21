@@ -11,13 +11,13 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import static no.ndla.taxonomy.TestUtils.assertAnyTrue;
-import static no.ndla.taxonomy.TestUtils.baseUrl;
+import static no.ndla.taxonomy.TestUtils.*;
+import static no.ndla.taxonomy.TestUtils.TOKEN_SERVER;
 import static org.junit.Assert.assertEquals;
 
 public class ImportTopicTest {
     RestTemplate restTemplate = new RestTemplate();
-    Importer importer = new Importer(new TaxonomyRestClient("http://localhost:5000", restTemplate));
+    Importer importer = new Importer(new TaxonomyRestClient(BASE_URL, CLIENT_ID, CLIENT_SECRET, TOKEN_SERVER, restTemplate));
 
     @Test
     public void can_add_topic() {
@@ -28,7 +28,7 @@ public class ImportTopicTest {
                 .build();
 
         importer.doImport(topicEntity);
-        TopicIndexDocument topic = restTemplate.getForObject(baseUrl + "/v1/topics/urn:topic:2", TopicIndexDocument.class);
+        TopicIndexDocument topic = restTemplate.getForObject(BASE_URL + "/v1/topics/urn:topic:2", TopicIndexDocument.class);
         assertEquals(topicEntity.getId(), topic.id);
     }
 
@@ -42,7 +42,7 @@ public class ImportTopicTest {
 
         importer.doImport(topicEntity);
         importer.doImport(topicEntity);
-        TopicIndexDocument topic = restTemplate.getForObject(baseUrl + "/v1/topics/urn:topic:2", TopicIndexDocument.class);
+        TopicIndexDocument topic = restTemplate.getForObject(BASE_URL + "/v1/topics/urn:topic:2", TopicIndexDocument.class);
         assertEquals(topicEntity.getId(), topic.id);
     }
 
@@ -59,7 +59,7 @@ public class ImportTopicTest {
         entity.contentUri = URI.create("urn:article:1");
         importer.doImport(entity);
 
-        TopicIndexDocument subject = restTemplate.getForObject(baseUrl + "/v1/topics/urn:topic:2", TopicIndexDocument.class);
+        TopicIndexDocument subject = restTemplate.getForObject(BASE_URL + "/v1/topics/urn:topic:2", TopicIndexDocument.class);
         assertEquals("urn:article:1", subject.contentUri.toString());
     }
 
@@ -77,7 +77,7 @@ public class ImportTopicTest {
                 .build();
 
         importer.doImport(topicEntity);
-        TopicIndexDocument topic = restTemplate.getForObject(baseUrl + "/v1/topics/urn:topic:2?language=nn", TopicIndexDocument.class);
+        TopicIndexDocument topic = restTemplate.getForObject(BASE_URL + "/v1/topics/urn:topic:2?language=nn", TopicIndexDocument.class);
         assertEquals("Tal og algebra", topic.name);
     }
 
@@ -98,7 +98,7 @@ public class ImportTopicTest {
                 .build();
         importer.doImport(topicEntity);
 
-        TopicSubtopicIndexDocument[] topicSubtopics = restTemplate.getForObject(baseUrl + "/v1/topic-subtopics", TopicSubtopicIndexDocument[].class);
+        TopicSubtopicIndexDocument[] topicSubtopics = restTemplate.getForObject(BASE_URL + "/v1/topic-subtopics", TopicSubtopicIndexDocument[].class);
         assertAnyTrue(topicSubtopics, t -> t.topicid.equals(parentEntity.getId()) && t.subtopicid.equals(topicEntity.getId()));
     }
 
@@ -111,7 +111,7 @@ public class ImportTopicTest {
                 .build();
         importer.doImport(entity);
 
-        TopicIndexDocument topic = restTemplate.getForObject(baseUrl + "/v1/topics/urn:topic:1:12345", TopicIndexDocument.class);
+        TopicIndexDocument topic = restTemplate.getForObject(BASE_URL + "/v1/topics/urn:topic:1:12345", TopicIndexDocument.class);
         assertEquals(entity.name, topic.name);
     }
 
@@ -150,10 +150,10 @@ public class ImportTopicTest {
                 .build();
         importer.doImport(topicRank2);
 
-        TopicIndexDocument[] topics = restTemplate.getForObject(baseUrl + "/v1/subjects/urn:subject:1/topics?recursive=true", TopicIndexDocument[].class);
-        assertEquals(parentEntity.getId(), topics[0].id);
-        assertEquals(topicRank1.getId(), topics[1].id);
-        assertEquals(topicRank2.getId(), topics[2].id);
+        TopicIndexDocument[] topics = restTemplate.getForObject(BASE_URL + "/v1/subjects/urn:subject:1/topics?recursive=true", TopicIndexDocument[].class);
+        assertEquals(0, topics[0].rank.intValue());
+        assertEquals(1, topics[1].rank.intValue());
+        assertEquals(2, topics[2].rank.intValue());
     }
 
     @Test
@@ -196,7 +196,7 @@ public class ImportTopicTest {
         subtopic.parent = parent2;
         importer.doImport(subtopic);
 
-        TopicSubtopicIndexDocument[] topicSubtopics = restTemplate.getForObject(baseUrl + "/v1/topic-subtopics", TopicSubtopicIndexDocument[].class);
+        TopicSubtopicIndexDocument[] topicSubtopics = restTemplate.getForObject(BASE_URL + "/v1/topic-subtopics", TopicSubtopicIndexDocument[].class);
         assertAnyTrue(topicSubtopics, ts -> ts.subtopicid.equals(subtopic.getId()) && ts.topicid.equals(parent2.getId()) && ts.primary);
     }
 }
