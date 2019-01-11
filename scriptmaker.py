@@ -42,7 +42,7 @@ export_folder = "ndla-export/"
 #   12  https://docs.google.com/spreadsheets/d/1_Gha5AVP5wUAfhF9BeQIWVyPElAsIReOYmVfZhedcyo/  service-og-samferdsel
 #   13  https://docs.google.com/spreadsheets/d/1g_dV6vesx61XOQGBPL0xW4lDGmFxGWJD2ZsrDy0nP-8/  naturbruk
 #   14  https://docs.google.com/spreadsheets/d/1I7r0SRG0NXr2ML6wYffEr-bkoURj-ERdA88h1Vu9oq0/  medie-og-informasjonskunnskap
-#   15  https://docs.google.com/spreadsheets/d/19IClAPKQloxKn-iTs1Bnnaden34-lNgoVEAmVtKxMh0/  sør-samisk
+#   15  https://docs.google.com/spreadsheets/d/19IClAPKQloxKn-iTs1Bnnaden34-lNgoVEAmVtKxMh0/  sørsamisk
 
 #   16  https://docs.google.com/spreadsheets/d/1CX6oEo8YPCY3j_Dv8spnxs4NsI59LFfwfDF6enAcMac/  elektrofag
 #   17  https://docs.google.com/spreadsheets/d/1JR4zsKyh7LC-vMG-EC-X_ovpg14IbUH3Qa3Z-flF5m0/  engelskspråklig-litteratur-og-kultur
@@ -68,6 +68,8 @@ export_folder = "ndla-export/"
 #   35 https://docs.google.com/spreadsheets/d/1UtiPGBPS-h3VUdUejPRJjk0Mi1yad4SOHXjwUYxC024/   Reiseliv
 #   36 https://docs.google.com/spreadsheets/d/1ny0gSl57scuev-MCs7kXBmdKj-eEJqqYP4NuP0CI7LA/   Transport og logistikk
 #   37 https://docs.google.com/spreadsheets/d/1H4EBhvVpaK9tnHdagm7X54YR_orYgg2A4Ij70SvSiF8/   Restaurant- og matfag Vg1
+#   38 https://docs.google.com/spreadsheets/d/1BfP-RZ3NfhWjO87nFe6JqcdfBG2wK6zvbCTt_5MExu0/   Design og håndverk Vg1
+#   39 https://docs.google.com/spreadsheets/d/1vk9-mASASr-UpPKy-N_08EcDRd1EpD1_2nVaq-fe_bM/   Engelsk Vg1
 
 jar_location = "target/taxonomy-import.jar"
 
@@ -105,7 +107,7 @@ subjects = [
     ("service-og-samferdsel", "Service og samferdsel Vg1"),
     ("naturbruk", "Naturbruk Vg1"),
     ("medie-og-informasjonskunnskap", "Medie- og informasjonskunnskap"),
-    ("sør-samisk", "Sørsamisk Vg1 og Vg2"),
+    ("sørsamisk", "Sørsamisk"),
     ("elektrofag", "Elektrofag"),
     ("engelskspråklig-litteratur-og-kultur", "Engelskspråklig litteratur og kultur"),
     ("kommunikasjon-og-kultur", "Kommunikasjon og kultur"),
@@ -127,7 +129,9 @@ subjects = [
     ("matematikk-1P-fellesfag", "1P - Matematikk fellesfag"),
     ("reiseliv", "Reiseliv"),
     ("transport-og-logistikk", "Transport og logistikk"),
-    ("restaurant-og-matfag", "Restaurant- og matfag Vg1")
+    ("restaurant-og-matfag", "Restaurant- og matfag Vg1"),
+    ("design-og-håndverk", "Design og håndverk Vg1"),
+    ("engelsk", "Engelsk Vg1")
 ]
 
 
