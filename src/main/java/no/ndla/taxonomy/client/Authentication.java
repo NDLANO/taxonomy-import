@@ -11,10 +11,9 @@ public class Authentication {
     public String scope;
 
     @JsonProperty
-    public String expires_in;
+    public Long expires_in;
 
     @JsonProperty
     public String token_type;
-
 
 }

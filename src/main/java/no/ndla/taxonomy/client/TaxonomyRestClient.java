@@ -39,33 +39,24 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.*;
 
 public class TaxonomyRestClient {
     private RestTemplate restTemplate;
-    private Authentication authentication;
     private String urlBase;
+    public Authentication authentication;
+    public Long last_token_update;
+    private String clientId;
+    private String clientSecret;
+    private String token_server;
 
     public TaxonomyRestClient(String urlBase, String clientId, String clientSecret, String token_server, RestTemplate restTemplate) {
         this.urlBase = urlBase;
         this.restTemplate = restTemplate;
-        if(clientId.equals("ITEST")){
-            List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
-            interceptors.add(new HeaderRequestInterceptor("batch", "1"));
-            restTemplate.setInterceptors(interceptors);
-        }else{
-            getAccessToken(clientId, clientSecret, token_server);
-            if(authentication != null){
-                List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
-                interceptors.add(new HeaderRequestInterceptor("batch", "1"));
-                interceptors.add(new HeaderRequestInterceptor("Authorization", "Bearer " + authentication.access_token));
-
-                restTemplate.setInterceptors(interceptors);
-            }else{
-                System.out.println("No valid authentication. Exiting.");
-                System.exit(0);
-            }
-        }
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.token_server = token_server;
     }
 
     private static final Map<String, String> controllerNames = new HashMap<String, String>() {
@@ -77,7 +68,6 @@ public class TaxonomyRestClient {
     };
 
     private void getAccessToken(String clientId, String clientSecret, String token_server){
-        RestTemplate authRestTemplate = new RestTemplate();
         CreateAuthCommand cmd = new CreateAuthCommand();
         cmd.grant_type = "client_credentials";
         cmd.client_id = clientId;
@@ -87,8 +77,9 @@ public class TaxonomyRestClient {
         HttpEntity<CreateAuthCommand> request = new HttpEntity<>(cmd);
         ResponseEntity<Authentication> response = null;
         try{
-            response = authRestTemplate.exchange(token_server, HttpMethod.POST, request, Authentication.class);
+            response = restTemplate.exchange(token_server, HttpMethod.POST, request, Authentication.class);
             authentication = response.getBody();
+            last_token_update = Instant.now().toEpochMilli();
         }catch (IllegalStateException | HttpClientErrorException e){
             System.out.println("401 Wrong Credentials? You are using the environment: " + token_server);
         }
@@ -381,6 +372,30 @@ public class TaxonomyRestClient {
         OldUrlMapping requestBody = new OldUrlMapping(oldUrl.substring(oldUrl.indexOf("ndla.no")), nodeId, oldSubject);
         restTemplate.exchange(urlBase + "/v1/url/mapping", HttpMethod.PUT, new HttpEntity<>(requestBody), OldUrlMapping.class);
     }
+
+    public void updateHeaders() {
+        if(this.clientId.equals("ITEST")){
+            List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+            interceptors.add(new HeaderRequestInterceptor("batch", "1"));
+            restTemplate.setInterceptors(interceptors);
+        }else{
+            if(TokenUpdateCheck.shouldUpdateToken(last_token_update, authentication)){
+                getAccessToken(clientId, clientSecret, token_server);
+                if(authentication != null){
+                    List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+                    interceptors.add(new HeaderRequestInterceptor("batch", "1"));
+                    interceptors.add(new HeaderRequestInterceptor("Authorization", "Bearer " + authentication.access_token));
+
+                    restTemplate.setInterceptors(interceptors);
+                }else{
+                    System.out.println("No valid authentication. Exiting.");
+                    System.exit(0);
+                }
+            }
+        }
+    }
+
+
 
     public static class OldUrlMapping {
         @JsonProperty
