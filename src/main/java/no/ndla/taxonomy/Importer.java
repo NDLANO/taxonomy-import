@@ -168,7 +168,7 @@ public class Importer {
         List<FilterIndexDocument> currentFilters = Arrays.asList(restClient.getFiltersForResource(entity.getId()));
 
         for (Filter filter : entity.filters) {
-            if (currentFilters.stream().noneMatch(f -> f.name.equalsIgnoreCase(filter.name))) {
+            if (currentFilters.stream().noneMatch(f -> f.name.equals(filter.name))) {
                 addFilterToResource(entity.getId(), filter, subject.getId());
                 System.out.println("Added filter resource connection: " + filter.name);
             }
