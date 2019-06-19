@@ -22,6 +22,7 @@ import no.ndla.taxonomy.client.subjects.FilterIndexDocument;
 import no.ndla.taxonomy.client.subjects.SubjectIndexDocument;
 import no.ndla.taxonomy.client.subjects.UpdateSubjectCommand;
 import no.ndla.taxonomy.client.topicFilters.AddFilterToTopicCommand;
+import no.ndla.taxonomy.client.topicResourceTypes.CreateTopicResourceTypeCommand;
 import no.ndla.taxonomy.client.topicResources.AddResourceToTopicCommand;
 import no.ndla.taxonomy.client.topicResources.TopicResourceIndexDocument;
 import no.ndla.taxonomy.client.topicResources.UpdateTopicResourceCommand;
@@ -237,6 +238,22 @@ public class TaxonomyRestClient {
 
     public void removeResourceResourceType(URI connectionId) {
         restTemplate.delete(urlBase + "/v1/resource-resourcetypes/{id}", Collections.singletonMap("id", connectionId.toString()));
+    }
+
+    public URI addTopicResourceType(URI topicId, URI resourceTypeId) {
+        CreateTopicResourceTypeCommand cmd = new CreateTopicResourceTypeCommand();
+        cmd.topicId = topicId;
+        cmd.resourceTypeId = resourceTypeId;
+        return restTemplate.postForLocation(urlBase + "/v1/topic-resourcetypes", cmd);
+    }
+
+    public no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument[] getResourceTypesForTopic(URI id) {
+        String url = urlBase + "/v1/topics/" + id + "/resource-types";
+        return restTemplate.getForObject(url, no.ndla.taxonomy.client.resources.ResourceTypeIndexDocument[].class);
+    }
+
+    public void removeTopicResourceType(URI connectionId) {
+        restTemplate.delete(urlBase + "/v1/topic-resourcetypes/{id}", Collections.singletonMap("id", connectionId.toString()));
     }
 
     public FilterIndexDocument[] getFiltersForSubject(URI subjectId) {
