@@ -257,6 +257,32 @@ public class Importer {
         }
     }
 
+    private void updateTopicResourceTypeConnections(Entity entity) {
+        List<ResourceTypeIndexDocument> currentResourceTypes = Arrays.asList(restClient.getResourceTypesForTopic(entity.getId()));
+
+        for (ResourceType resourceType : entity.resourceTypes) {
+            if (currentResourceTypes.stream().noneMatch(rt -> rt.name.equalsIgnoreCase(resourceType.name))) {
+                addResourceTypeToTopic(entity.getId(), resourceType);
+                System.out.println("Importing topic resource type connection: " + resourceType.name);
+            }
+        }
+
+        for (ResourceTypeIndexDocument resourceType : currentResourceTypes) {
+            if (entity.resourceTypes.stream().noneMatch(rt -> rt.name.equalsIgnoreCase(resourceType.name))) {
+                removeResourceTypeFromTopic(resourceType.connectionId);
+            }
+        }
+    }
+
+    private void addResourceTypeToTopic(URI topicId, ResourceType resourceType) {
+        URI resourceTypeId = getOrCreateResourceTypeId(resourceType);
+        restClient.addTopicResourceType(topicId, resourceTypeId);
+    }
+
+    private void removeResourceTypeFromTopic(URI connectionId) {
+        restClient.removeTopicResourceType(connectionId);
+    }
+
     private void updateResourceResourceTypeConnections(Entity entity) {
         List<ResourceTypeIndexDocument> currentResourceTypes = Arrays.asList(restClient.getResourceTypesForResource(entity.getId()));
 
@@ -379,6 +405,7 @@ public class Importer {
             }
         }
         updateFiltersForTopic(entity);
+        updateTopicResourceTypeConnections(entity);
         return location;
     }
 
