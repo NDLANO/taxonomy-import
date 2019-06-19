@@ -154,6 +154,10 @@ public class TsvParser implements Iterator<Entity> {
                 System.out.println("Skipping entity " + result.nodeId +  ", no resource type.");
                 return null;
             }
+        } else if (result.type.equals(Importer.TOPIC_TYPE)) {
+            if (setResourceType()) {
+                System.out.println("Topic with resource type(s) "+result.nodeId+" "+result.name);
+            }
         }
         setParent();
         setFilters();
