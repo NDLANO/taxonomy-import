@@ -33,7 +33,9 @@ import no.ndla.taxonomy.client.topics.SubtopicIndexDocument;
 import no.ndla.taxonomy.client.topics.TopicIndexDocument;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -57,6 +59,20 @@ public class TaxonomyRestClient {
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.token_server = token_server;
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+        interceptors.add(new HeaderRequestInterceptor("batch", "1"));
+        if(!this.clientId.equals("ITEST")) {
+            interceptors.add((HttpRequest request, byte[] body, ClientHttpRequestExecution execution) -> {
+                if(TokenUpdateCheck.shouldUpdateToken(last_token_update, authentication)) {
+                    getAccessToken(this.clientId, this.clientSecret, this.token_server);
+                }
+                if (authentication != null) {
+                    request.getHeaders().add("Authorization", "Bearer " + authentication.access_token);
+                }
+                return execution.execute(request, body);
+            });
+        }
+        restTemplate.setInterceptors(interceptors);
     }
 
     private static final Map<String, String> controllerNames = new HashMap<String, String>() {
@@ -77,7 +93,11 @@ public class TaxonomyRestClient {
         HttpEntity<CreateAuthCommand> request = new HttpEntity<>(cmd);
         ResponseEntity<Authentication> response = null;
         try{
-            response = restTemplate.exchange(token_server, HttpMethod.POST, request, Authentication.class);
+            /*
+             * Need to use a different RestTemplate in order to not try to add
+             * authorization to the request for authorization (loop).
+             */
+            response = new RestTemplate().exchange(token_server, HttpMethod.POST, request, Authentication.class);
             authentication = response.getBody();
             last_token_update = Instant.now().toEpochMilli();
         }catch (IllegalStateException | HttpClientErrorException e){
@@ -371,28 +391,6 @@ public class TaxonomyRestClient {
     public void addUrlMapping(String oldUrl, URI nodeId, URI oldSubject) {
         OldUrlMapping requestBody = new OldUrlMapping(oldUrl.substring(oldUrl.indexOf("ndla.no")), nodeId, oldSubject);
         restTemplate.exchange(urlBase + "/v1/url/mapping", HttpMethod.PUT, new HttpEntity<>(requestBody), OldUrlMapping.class);
-    }
-
-    public void updateHeaders() {
-        if(this.clientId.equals("ITEST")){
-            List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
-            interceptors.add(new HeaderRequestInterceptor("batch", "1"));
-            restTemplate.setInterceptors(interceptors);
-        }else{
-            if(TokenUpdateCheck.shouldUpdateToken(last_token_update, authentication)){
-                getAccessToken(clientId, clientSecret, token_server);
-                if(authentication != null){
-                    List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
-                    interceptors.add(new HeaderRequestInterceptor("batch", "1"));
-                    interceptors.add(new HeaderRequestInterceptor("Authorization", "Bearer " + authentication.access_token));
-
-                    restTemplate.setInterceptors(interceptors);
-                }else{
-                    System.out.println("No valid authentication. Exiting.");
-                    System.exit(0);
-                }
-            }
-        }
     }
 
 
