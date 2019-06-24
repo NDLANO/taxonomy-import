@@ -36,8 +36,6 @@ public class Importer {
     }
 
     void doImport(Entity entity) {
-        restClient.updateHeaders();
-
         if (entity == null) return;
 
         if (entity.type.equals(SUBJECT_TYPE)) {
